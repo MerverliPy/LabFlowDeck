@@ -1,19 +1,20 @@
 # Current Phase
 
 Status: completed
-Candidate ID: hub-mobile-shell
+Candidate ID: projects-create-flow-path
 
 ## Goal
 
-Build the first mobile Hub shell for LabFlowDeck so the repo has a real product surface instead of only a specification export.
+Wire the Projects create-project CTA into a small guided mobile-first flow so the shell has a meaningful next step before live repository integration.
 
 ## Why this phase is next
 
-The Hub is the default landing experience in `SPEC.md` and provides the fastest path to a visible, product-shaped shell.
+This is explicit user scope, stays inside the existing `apps/web` Projects module, and reduces integration risk by giving the CTA a real destination before deeper backend or GitHub work begins.
 
 ## Primary files
 
-- apps/web/app/page.tsx
+- apps/web/app/projects/page.tsx
+- apps/web/app/projects/new/page.tsx
 - apps/web/app/globals.css
 
 ## Expected max files changed
@@ -22,35 +23,27 @@ The Hub is the default landing experience in `SPEC.md` and provides the fastest 
 
 ## Risk
 
-Low. This is a contained frontend scaffold phase.
-
-## Rollback note
-
-Revert the new `apps/web` scaffold if needed without affecting the original spec files.
+Low. This is a bounded frontend-only follow-up that adds a static guided path without expanding backend scope.
 
 ## In scope
 
-- Hub header
-- system status card
-- quick actions section
-- workflow summary cards
-- hosts and deployments summary
-- activity feed shell
+- Link the existing create-project CTA to a dedicated route
+- Add a lightweight guided create-project screen aligned to the Projects flow in `SPEC.md`
+- Show placeholder steps for repo selection, host selection, service confirmation, and optional workflow attachment
+- Add only the shared styling needed for the new route
 
 ## Out of scope
 
-- live backend data
-- authentication
-- host pairing logic
-- deployment execution
-- workflow runtime engine
+- Real GitHub repository browsing or authentication
+- Persisting created projects
+- Host-backed creation logic or service discovery
+- Project detail routing or broader navigation refactors
 
 ## Tasks
 
-- Create the web app scaffold.
-- Implement the Hub page shell.
-- Add mobile-first dark theme styles.
-- Add minimal app metadata and health route.
+- Update the Projects CTA to navigate to a guided create flow
+- Add `apps/web/app/projects/new/page.tsx` with a small four-step placeholder flow
+- Extend `apps/web/app/globals.css` for flow cards, step list, selection cards, and CTA styling
 
 ## Validation command
 
@@ -62,10 +55,11 @@ passed — `pnpm build:web`
 
 ## Acceptance criteria
 
-- Home page renders a coherent mobile-first command center.
-- The shell reflects the core Hub concepts from `SPEC.md`.
-- The repo contains a minimal runnable web app structure.
+- The create-project CTA from `/projects` navigates to a dedicated guided path
+- The new path presents a coherent mobile-first create flow shell with the main steps from `SPEC.md`
+- The implementation remains frontend-only and does not introduce speculative backend behavior
+- `pnpm build:web` passes
 
 ## Completion summary
 
-Mobile-first Hub shell is present in `apps/web/app/page.tsx` with the planned status, quick action, workflow, host/deploy, and activity sections. Minimal app metadata and a thin health route are in place, the web app builds successfully, and all listed acceptance criteria are met. Phase is ready for `/ship-phase`.
+The Projects CTA now routes to `/projects/new`, where a lightweight mobile-first guided flow presents placeholder steps for project naming, repo selection, host selection, service confirmation, and optional workflow attachment. Shared styling was added only for this route and its actions, and the web app build passed after the change.

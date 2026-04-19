@@ -85,6 +85,10 @@ h1 {
   margin-top: 0;
 }
 
+.card h2 {
+  margin-bottom: 0;
+}
+
 .cardTitle {
   display: flex;
   align-items: center;
@@ -168,6 +172,184 @@ h1 {
   padding: 14px 10px;
   text-align: left;
   font: inherit;
+}
+
+.projectSummaryCard {
+  gap: 12px;
+}
+
+.createProjectCard {
+  display: grid;
+  gap: 16px;
+}
+
+.createProjectHeader {
+  margin-bottom: 10px;
+}
+
+.createProjectCopy {
+  margin-bottom: 0;
+}
+
+.primaryCta {
+  width: 100%;
+  border: 0;
+  border-radius: 18px;
+  padding: 15px 16px;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.28);
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondaryCta {
+  width: 100%;
+  border: 1px solid rgba(159, 176, 199, 0.18);
+  border-radius: 18px;
+  padding: 15px 16px;
+  background: rgba(11, 16, 32, 0.55);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+}
+
+.projectsStack {
+  display: grid;
+  gap: 14px;
+}
+
+.projectCard {
+  display: grid;
+  gap: 14px;
+}
+
+.projectCardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.projectRepo {
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.projectSignalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.projectSignal {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(159, 176, 199, 0.1);
+}
+
+.projectSignalLabel {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.projectSignalValue {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.projectBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flowIntroCard,
+.flowCard,
+.flowFooterCard {
+  display: grid;
+  gap: 14px;
+}
+
+.flowSteps,
+.inputStack,
+.selectionStack,
+.serviceList,
+.flowActions {
+  display: grid;
+  gap: 10px;
+}
+
+.flowStepItem,
+.selectionCard,
+.serviceItem,
+.fieldShell {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(159, 176, 199, 0.1);
+}
+
+.flowStepItem,
+.selectionCard,
+.serviceItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.flowStepIndex {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.16);
+  color: #8dc0ff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.flowStepBody,
+.selectionBody {
+  min-width: 0;
+}
+
+.flowStepTitle,
+.selectionTitle,
+.fieldValue {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.flowStepCopy,
+.selectionCopy,
+.flowHint {
+  margin-bottom: 0;
+}
+
+.fieldLabel {
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.selectionCardActive {
+  border-color: rgba(59, 130, 246, 0.36);
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18);
 }
 
 .bottomNav {
