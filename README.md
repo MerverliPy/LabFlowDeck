@@ -59,6 +59,10 @@ pnpm install
 pnpm dev:web
 ```
 
+## Security operator note
+
+If you deployed this app while it was pinned to an older vulnerable Next.js App Router release, redeploy after upgrading so the patched runtime is actually in service. If that unpatched runtime was internet-exposed, review access logs and rotate any secrets that may have been present in the running environment.
+
 ## Notes
 
 This is an intentionally thin first scaffold. It establishes the repo shape, execution workflow, and a credible product shell without pretending the full platform is already implemented.
