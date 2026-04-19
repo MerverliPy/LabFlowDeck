@@ -1,6 +1,6 @@
 # Current Phase
 
-Status: pending
+Status: completed
 Candidate ID: hub-mobile-shell
 
 ## Goal
@@ -58,7 +58,7 @@ pnpm build:web
 
 ## Validation
 
-pending
+passed — `pnpm build:web`
 
 ## Acceptance criteria
 
@@ -68,4 +68,4 @@ pending
 
 ## Completion summary
 
-pending
+Mobile-first Hub shell is present in `apps/web/app/page.tsx` with the planned status, quick action, workflow, host/deploy, and activity sections. Minimal app metadata and a thin health route are in place, the web app builds successfully, and all listed acceptance criteria are met. Phase is ready for `/ship-phase`.
