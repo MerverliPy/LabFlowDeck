@@ -62,6 +62,8 @@ candidates:
 
   - id: publish-runtime-truth-readme
     title: Add a current implemented surfaces section and honest runtime limitations to README
+    status: completed
+    completion_note: Added an audited implemented-surfaces section, separated shell-only flows from future integrations, and explicitly documented missing auth, host pairing, and persistence.
     module: docs
     priority: 90
     files:

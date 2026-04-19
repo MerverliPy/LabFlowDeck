@@ -1,66 +1,66 @@
 # Current Phase
 
 Status: completed
-Candidate ID: publish-runtime-truth-readme
+Candidate ID: classify-screen-exports-reference
 
 ## Goal
 
-Add a current implemented surfaces section and honest runtime limitations to README so the repo stops overstating shipped product maturity.
+Mark the `screens/` exports as design-reference artifacts so the repo clearly distinguishes visual source material from the actual shipped `apps/web` runtime.
 
 ## Why this phase is next
 
-`reconcile-opencode-phase-state` is now completed, so it must no longer remain the active candidate. The founder priority queue places `publish-runtime-truth-readme` next, and it is the next bounded credibility fix before any more product-surface work continues.
+`publish-runtime-truth-readme` is effectively complete and should no longer block the next founder-priority credibility fix. The next highest-priority eligible candidate is `classify-screen-exports-reference`, and it is still bounded, low-risk, and tightly aligned with the just-finished README truthfulness work.
 
 ## Primary files
 
+- screens/README.md
 - README.md
 - .opencode/plans/current-phase.md
 
 ## Expected max files changed
 
-2
+3
 
 ## Risk
 
-Low. This is bounded documentation work, but inaccurate wording could still overstate what the runtime actually ships today.
+Low. This is documentation-only work, but unclear wording could still imply that the exported screen files are feature-complete runtime routes rather than reference artifacts.
 
 ## In scope
 
-- Audit the currently shipped `apps/web` runtime routes and thin API surfaces before editing README claims.
-- Add a durable README section for current implemented surfaces.
-- Separate implemented runtime surfaces from placeholder flows and future integrations.
-- Explicitly note the absence of auth, host pairing, and persistence if they are still not implemented.
+- Add a `screens/README.md` that explains the folder contains design-reference exports.
+- Cross-link the `screens/` folder from the main README with the same caveat.
+- Reword any nearby documentation that could imply parity between `screens/` exports and `apps/web` runtime surfaces.
 
 ## Out of scope
 
-- New product routes or UI shell expansion.
-- Auth, host pairing, persistence, or backend orchestration implementation.
-- Screens/design-reference labeling work.
-- Any dependency, lockfile, or runtime-behavior changes.
+- Converting `screens/` exports into runnable routes.
+- Adding new product features or expanding the web shell.
+- Refactoring the exported screen files themselves.
+- Backend, auth, host pairing, persistence, or orchestration work.
 
 ## Tasks
 
-- Audit all currently shipped routes in `apps/web/app` and thin API routes under `apps/web/app/api`.
-- Update README with a `Current implemented surfaces` section that only lists confirmed runtime surfaces.
-- Add a `Not implemented yet` section that clearly separates placeholder UI flows from future integrations.
-- Re-read README after editing to ensure no wording claims auth, host pairing, persistence, or deeper backend execution already exist.
+- Audit the `screens/` directory and current README wording for maturity claims.
+- Create `screens/README.md` describing the exports as design-reference artifacts, not shipped runtime routes.
+- Update the root README to reference `screens/` with the same caveat.
+- Re-read both documents to ensure they clearly separate design references from implemented `apps/web` surfaces.
 
 ## Validation command
 
-grep -n "Current implemented surfaces" README.md
-grep -n "Not implemented yet" README.md
+grep -n "design-reference" screens/README.md
+grep -n "screens/" README.md
 
 ## Validation
 
-passed — `grep -n "Current implemented surfaces" README.md` → `37:## Current implemented surfaces`
-passed — `grep -n "Not implemented yet" README.md` → `54:## Not implemented yet`
+passed — `grep -n "design-reference" screens/README.md` matched the design-reference wording in `screens/README.md`
+passed — `grep -n "screens/" README.md` matched the new `screens/` caveat in the root README
 
 ## Acceptance criteria
 
-- README lists only shipped runtime routes and thin API routes as implemented.
-- README explicitly separates implemented surfaces, placeholder flows, and future integrations.
-- README explicitly notes lack of auth, host pairing, and persistence if those are still not implemented.
+- `screens/README.md` states that screens exports are design-reference artifacts, not runtime routes.
+- README cross-links to `screens/` with the same caveat.
+- Wording no longer implies parity between screens exports and `apps/web` runtime implementation.
 
 ## Completion summary
 
-README now documents the currently shipped web and API surfaces, explicitly labels placeholder UI flows, and calls out the missing auth, host pairing, and persistence layers so the repo no longer overstates runtime maturity.
+Added a dedicated `screens/README.md` that classifies the exported screen files as design-reference artifacts and updated the root README to cross-link that folder with matching caveats so design exports no longer overstate shipped runtime maturity.

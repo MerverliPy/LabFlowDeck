@@ -17,6 +17,7 @@ The original repo content was a Mowgli export: a strong product specification an
 
 - `SPEC.md` — product spec and UX scope
 - `apps/web` — mobile-first platform shell
+- `screens/` — design-reference artifacts from exported mockups, not shipped runtime routes
 - `.opencode/agents` — role definitions for orchestrated development
 - `.opencode/commands` — phase workflow commands
 - `.opencode/backlog/candidates.yaml` — prioritized implementation queue
@@ -33,6 +34,10 @@ The workflow is optimized for **high-signal, low-overhead implementation**:
 4. **Shipper** prepares final summary and commit/PR framing.
 
 This keeps planning explicit, implementation bounded, and validation auditable.
+
+## Design references
+
+The `screens/` directory contains design-reference exports from the earlier mockup workflow. They are useful for visual guidance, but they should not be read as proof that equivalent `apps/web` runtime routes, backend integrations, or completed product flows already ship today.
 
 ## Current implemented surfaces
 
