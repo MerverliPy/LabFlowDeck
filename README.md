@@ -1,6 +1,6 @@
 # LabFlowDeck
 
-LabFlowDeck is a **mobile-first command center for AI-assisted software delivery**. It is designed for iPhone-sized screens and focuses on orchestrating GitHub-linked projects, workflow agents, remote hosts, and Docker-based deployments from a clean operational control plane.
+LabFlowDeck is a **mobile-first command center for AI-assisted software delivery**. Today, the shipped runtime is still a thin Next.js control-plane shell: it demonstrates the intended mobile UX and a few bounded API contracts without claiming that live GitHub, host, auth, or deployment orchestration are fully implemented.
 
 This repository now follows a **hybrid product + workflow** structure:
 
@@ -34,23 +34,40 @@ The workflow is optimized for **high-signal, low-overhead implementation**:
 
 This keeps planning explicit, implementation bounded, and validation auditable.
 
-## Product direction
+## Current implemented surfaces
 
-Based on `SPEC.md`, LabFlowDeck targets these core areas:
+Confirmed runtime routes in `apps/web`:
 
-- GitHub-linked project control
-- Remote host pairing and monitoring
-- Agent workflow creation and execution
-- Docker/Compose deployment visibility and actions
-- Activity, execution logs, and mobile-friendly operational insight
+- `/` — Hub shell with mobile-first status cards, quick actions, workflow summary, and recent activity
+- `/projects` — Projects list shell with stacked status cards and a create-project CTA
+- `/projects/new` — guided project-creation placeholder flow
+- `/agents` — workflow list shell with recent run summaries
+- `/agents/new` — guided workflow-creation placeholder flow
+- `/deploy` — deploy control-plane shell backed by typed mock data, URL-persisted filters, refresh, and confirmation-driven simulated actions
 
-## Immediate next phase
+Confirmed thin API routes in `apps/web/app/api`:
 
-The repo is scaffolded to start with:
+- `GET /api/health` — lightweight health payload for the web shell
+- `GET /api/deploy/status` — simulated deployment status payload used by `/deploy`
+- `POST /api/deploy/actions` — request validation and simulated deploy-action acceptance/rejection without real Docker control
 
-- a mobile-first Hub experience
-- reusable platform cards and status sections
-- workflow/backlog infrastructure for iterative delivery
+## Not implemented yet
+
+Placeholder UI flows that currently ship as shell-only routes:
+
+- `/projects/new` does not browse GitHub, pair a real host, or persist a created project
+- `/agents/new` does not save workflows, edit reusable steps, schedule runs, or execute agents
+- `/deploy` uses a bounded adapter seam with simulated data and accepted action requests rather than live host or Docker control
+
+Future integrations and backend work that are still absent from the runtime:
+
+- authentication, user accounts, and access control
+- real GitHub linking, repo discovery, and webhook-backed workflow activity
+- real host pairing, SSH transport, and host heartbeat/storage
+- persistence for projects, workflows, deployment state, or saved drafts
+- background execution, streaming logs, and production-grade orchestration
+
+The current runtime should be read as an honest mobile-first product shell, not a fully integrated control plane.
 
 ## Local start
 

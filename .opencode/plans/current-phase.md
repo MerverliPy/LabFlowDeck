@@ -1,6 +1,6 @@
 # Current Phase
 
-Status: ready
+Status: completed
 Candidate ID: publish-runtime-truth-readme
 
 ## Goal
@@ -50,8 +50,17 @@ Low. This is bounded documentation work, but inaccurate wording could still over
 grep -n "Current implemented surfaces" README.md
 grep -n "Not implemented yet" README.md
 
+## Validation
+
+passed — `grep -n "Current implemented surfaces" README.md` → `37:## Current implemented surfaces`
+passed — `grep -n "Not implemented yet" README.md` → `54:## Not implemented yet`
+
 ## Acceptance criteria
 
 - README lists only shipped runtime routes and thin API routes as implemented.
 - README explicitly separates implemented surfaces, placeholder flows, and future integrations.
 - README explicitly notes lack of auth, host pairing, and persistence if those are still not implemented.
+
+## Completion summary
+
+README now documents the currently shipped web and API surfaces, explicitly labels placeholder UI flows, and calls out the missing auth, host pairing, and persistence layers so the repo no longer overstates runtime maturity.
