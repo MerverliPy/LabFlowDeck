@@ -1,73 +1,57 @@
 # Current Phase
 
-Status: completed
-Candidate ID: reconcile-opencode-phase-state
+Status: ready
+Candidate ID: publish-runtime-truth-readme
 
 ## Goal
 
-Reconcile backlog, current-phase, and command-state so the OpenCode workflow is auditable again and no completed candidate remains as the active phase.
+Add a current implemented surfaces section and honest runtime limitations to README so the repo stops overstating shipped product maturity.
 
 ## Why this phase is next
 
-`patch-nextjs-security-line` is already completed, so it must be ignored for next-phase selection. The founder priority queue explicitly places `reconcile-opencode-phase-state` next, and it is the smallest high-priority change that restores workflow trust before more docs or product-surface work continues.
+`reconcile-opencode-phase-state` is now completed, so it must no longer remain the active candidate. The founder priority queue places `publish-runtime-truth-readme` next, and it is the next bounded credibility fix before any more product-surface work continues.
 
 ## Primary files
 
-- .opencode/backlog/candidates.yaml
+- README.md
 - .opencode/plans/current-phase.md
-- .opencode/plans/founder-priority-fixes.md
-- .opencode/commands/phase-status.md
-- .opencode/commands/priority-fixes.md
 
 ## Expected max files changed
 
-5
+2
 
 ## Risk
 
-Low. This is bounded governance/documentation work, but mistakes could leave backlog and active-phase state out of sync.
+Low. This is bounded documentation work, but inaccurate wording could still overstate what the runtime actually ships today.
 
 ## In scope
 
-- Mark or otherwise reconcile completed founder-priority candidates in durable workflow files.
-- Ensure the active candidate selected by workflow commands exists in backlog candidates.
-- Keep the founder priority order explicit in one durable roadmap file.
-- Make the phase-status command check for backlog/current-phase alignment.
-- Remove stale active-phase references caused by already completed work.
+- Audit the currently shipped `apps/web` runtime routes and thin API surfaces before editing README claims.
+- Add a durable README section for current implemented surfaces.
+- Separate implemented runtime surfaces from placeholder flows and future integrations.
+- Explicitly note the absence of auth, host pairing, and persistence if they are still not implemented.
 
 ## Out of scope
 
 - New product routes or UI shell expansion.
-- Auth, host pairing, persistence, or backend orchestration.
-- README runtime-truth edits beyond what is strictly required for phase-state reconciliation.
+- Auth, host pairing, persistence, or backend orchestration implementation.
 - Screens/design-reference labeling work.
+- Any dependency, lockfile, or runtime-behavior changes.
 
 ## Tasks
 
-- Review founder-priority files and identify where completed-phase drift still exists.
-- Update backlog candidate state or surrounding guidance so completed candidates are no longer treated as active next-phase options.
-- Rewrite `current-phase.md` to point at the correct unresolved candidate.
-- Tighten command guidance so `/phase-status` and priority-fix flow explicitly verify alignment.
-- Re-check that all referenced candidate IDs exist and that no stale active candidate remains.
+- Audit all currently shipped routes in `apps/web/app` and thin API routes under `apps/web/app/api`.
+- Update README with a `Current implemented surfaces` section that only lists confirmed runtime surfaces.
+- Add a `Not implemented yet` section that clearly separates placeholder UI flows from future integrations.
+- Re-read README after editing to ensure no wording claims auth, host pairing, persistence, or deeper backend execution already exist.
 
 ## Validation command
 
-grep -n "Candidate ID:" .opencode/plans/current-phase.md
-grep -n "patch-nextjs-security-line" .opencode/backlog/candidates.yaml
-grep -n "reconcile-opencode-phase-state" .opencode/backlog/candidates.yaml
-grep -n "publish-runtime-truth-readme" .opencode/backlog/candidates.yaml
-grep -n "classify-screen-exports-reference" .opencode/backlog/candidates.yaml
+grep -n "Current implemented surfaces" README.md
+grep -n "Not implemented yet" README.md
 
 ## Acceptance criteria
 
-- The active `Candidate ID` exists in backlog candidates.
-- The founder priority order is recorded in one durable roadmap file.
-- The `/phase-status` command explicitly checks backlog/current-phase alignment.
-- No stale completed candidate remains as the active phase after the update.
-
-## Completion summary
-
-- Marked `patch-nextjs-security-line` as `status: completed` in backlog and added explicit status-selection guidance so completed candidates can be ignored safely.
-- Added a durable founder-priority progress snapshot that shows the completed fix and the next unresolved candidate.
-- Tightened `/phase-status` and `/priority-fixes` so they fail on missing or already-completed active candidates instead of silently accepting drift.
-- Validation passed against the updated current-phase file and founder-priority candidate IDs in backlog.
+- README lists only shipped runtime routes and thin API routes as implemented.
+- README explicitly separates implemented surfaces, placeholder flows, and future integrations.
+- README explicitly notes lack of auth, host pairing, and persistence if those are still not implemented.

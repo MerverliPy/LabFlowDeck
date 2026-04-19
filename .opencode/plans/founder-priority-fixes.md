@@ -17,9 +17,9 @@ Resolve the founder-level credibility and alignment gaps before adding more prod
 
 ## Progress snapshot
 
-- Completed: `patch-nextjs-security-line`
-- Next unresolved founder fix: `reconcile-opencode-phase-state`
-- Remaining after that: `publish-runtime-truth-readme`, `classify-screen-exports-reference`
+- Completed: `patch-nextjs-security-line`, `reconcile-opencode-phase-state`
+- Next unresolved founder fix: `publish-runtime-truth-readme`
+- Remaining after that: `classify-screen-exports-reference`
 
 ## Exit criteria
 

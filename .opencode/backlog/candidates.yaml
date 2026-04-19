@@ -38,6 +38,8 @@ candidates:
 
   - id: reconcile-opencode-phase-state
     title: Reconcile backlog, current phase, and command-state so the OpenCode workflow is auditable again
+    status: completed
+    completion_note: Marked this governance fix complete after reconciling backlog/current-phase state, promoting the next unresolved founder fix into current-phase, and preserving grep-based validation evidence.
     module: .opencode
     priority: 95
     files:
