@@ -1,75 +1,73 @@
 # Current Phase
 
 Status: completed
-Candidate ID: patch-nextjs-security-line
+Candidate ID: reconcile-opencode-phase-state
 
 ## Goal
 
-Patch the Next.js release line used by the web app, regenerate the lockfile, and document the required operator guidance so the repo no longer carries a known framework-security credibility gap.
+Reconcile backlog, current-phase, and command-state so the OpenCode workflow is auditable again and no completed candidate remains as the active phase.
 
 ## Why this phase is next
 
-This is the highest-priority founder fix. It removes the most immediate security and credibility issue before further shell or documentation work continues.
+`patch-nextjs-security-line` is already completed, so it must be ignored for next-phase selection. The founder priority queue explicitly places `reconcile-opencode-phase-state` next, and it is the smallest high-priority change that restores workflow trust before more docs or product-surface work continues.
 
 ## Primary files
 
-- apps/web/package.json
-- pnpm-lock.yaml
-- README.md
+- .opencode/backlog/candidates.yaml
+- .opencode/plans/current-phase.md
+- .opencode/plans/founder-priority-fixes.md
+- .opencode/commands/phase-status.md
+- .opencode/commands/priority-fixes.md
 
 ## Expected max files changed
 
-3
+5
 
 ## Risk
 
-Medium. Dependency upgrades can break build behavior even on patch/minor transitions, so the work must stay tightly scoped and validation-backed.
+Low. This is bounded governance/documentation work, but mistakes could leave backlog and active-phase state out of sync.
 
 ## In scope
 
-- Verify the currently installed Next.js release line.
-- Upgrade to a patched target in the same release line unless a deliberate major upgrade is chosen.
-- Regenerate the lockfile.
-- Confirm the web app still builds.
-- Add a concise README operator note for redeploy and post-patch secret-rotation guidance if the app was exposed while unpatched.
+- Mark or otherwise reconcile completed founder-priority candidates in durable workflow files.
+- Ensure the active candidate selected by workflow commands exists in backlog candidates.
+- Keep the founder priority order explicit in one durable roadmap file.
+- Make the phase-status command check for backlog/current-phase alignment.
+- Remove stale active-phase references caused by already completed work.
 
 ## Out of scope
 
-- Major framework migration work.
-- Feature development.
-- Auth, host, or provider integration.
-- Any new product routes or runtime surfaces.
+- New product routes or UI shell expansion.
+- Auth, host pairing, persistence, or backend orchestration.
+- README runtime-truth edits beyond what is strictly required for phase-state reconciliation.
+- Screens/design-reference labeling work.
 
 ## Tasks
 
-- Confirm the current `apps/web` Next.js version.
-- Select the patched target version for the active release line.
-- Update dependency and lockfile.
-- Run the web build.
-- Add the README operator note without overstating implementation maturity.
+- Review founder-priority files and identify where completed-phase drift still exists.
+- Update backlog candidate state or surrounding guidance so completed candidates are no longer treated as active next-phase options.
+- Rewrite `current-phase.md` to point at the correct unresolved candidate.
+- Tighten command guidance so `/phase-status` and priority-fix flow explicitly verify alignment.
+- Re-check that all referenced candidate IDs exist and that no stale active candidate remains.
 
 ## Validation command
 
-node -p "require('./apps/web/package.json').dependencies.next" && pnpm install --frozen-lockfile=false && pnpm build:web
+grep -n "Candidate ID:" .opencode/plans/current-phase.md
+grep -n "patch-nextjs-security-line" .opencode/backlog/candidates.yaml
+grep -n "reconcile-opencode-phase-state" .opencode/backlog/candidates.yaml
+grep -n "publish-runtime-truth-readme" .opencode/backlog/candidates.yaml
+grep -n "classify-screen-exports-reference" .opencode/backlog/candidates.yaml
 
 ## Acceptance criteria
 
-- The repo no longer pins a Next.js version known to be vulnerable for the active App Router security advisories.
-- The lockfile is regenerated from the patched dependency target.
-- `pnpm build:web` passes.
-- README contains a short operator note on redeploy and secret rotation if the app was exposed while unpatched.
+- The active `Candidate ID` exists in backlog candidates.
+- The founder priority order is recorded in one durable roadmap file.
+- The `/phase-status` command explicitly checks backlog/current-phase alignment.
+- No stale completed candidate remains as the active phase after the update.
 
 ## Completion summary
 
-Completed.
-
-- Updated `apps/web` from `next@15.2.4` to `next@15.5.15`, which satisfies the currently reported patched 15.x advisory floor from `pnpm audit --prod`.
-- Regenerated `pnpm-lock.yaml` against `15.5.15`.
-- Added the required README operator note covering redeploy and secret-rotation guidance for previously exposed unpatched runtimes.
-- Validation passed:
-  - `node -p "require('./apps/web/package.json').dependencies.next"` → `15.5.15`
-  - `pnpm install --frozen-lockfile=false`
-  - `pnpm audit --prod` → `No known vulnerabilities found`
-  - `pnpm build:web` → passed
-
-Non-blocking note: `pnpm build:web` emitted a Next.js workspace-root warning because an additional `/home/calvin/package-lock.json` exists outside this repo.
+- Marked `patch-nextjs-security-line` as `status: completed` in backlog and added explicit status-selection guidance so completed candidates can be ignored safely.
+- Added a durable founder-priority progress snapshot that shows the completed fix and the next unresolved candidate.
+- Tightened `/phase-status` and `/priority-fixes` so they fail on missing or already-completed active candidates instead of silently accepting drift.
+- Validation passed against the updated current-phase file and founder-priority candidate IDs in backlog.

@@ -10,7 +10,85 @@ constraints:
   prefer_single_module: true
   avoid_generic_tasks: true
 
+status_rules:
+  ineligible_statuses:
+    - completed
+
 candidates:
+  - id: patch-nextjs-security-line
+    title: Patch the Next.js release line and record post-patch operator guidance
+    status: completed
+    completion_note: Updated to a patched Next.js 15.x release, regenerated the lockfile, and passed the web build.
+    module: apps/web
+    priority: 100
+    files:
+      - apps/web/package.json
+      - pnpm-lock.yaml
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: |
+      node -p "require('./apps/web/package.json').dependencies.next"
+      pnpm install --frozen-lockfile=false
+      pnpm build:web
+    acceptance:
+      - The repo no longer pins a Next.js version known to be vulnerable for the active App Router security advisories.
+      - The selected version is in a patched release line and the lockfile is regenerated.
+      - The web app build passes after the dependency update.
+      - README includes a short operator note covering redeploy and secret-rotation guidance if the app was exposed while unpatched.
+
+  - id: reconcile-opencode-phase-state
+    title: Reconcile backlog, current phase, and command-state so the OpenCode workflow is auditable again
+    module: .opencode
+    priority: 95
+    files:
+      - .opencode/backlog/candidates.yaml
+      - .opencode/plans/current-phase.md
+      - .opencode/plans/founder-priority-fixes.md
+      - .opencode/commands/phase-status.md
+      - .opencode/commands/priority-fixes.md
+    validation: |
+      grep -n "Candidate ID:" .opencode/plans/current-phase.md
+      grep -n "patch-nextjs-security-line" .opencode/backlog/candidates.yaml
+      grep -n "reconcile-opencode-phase-state" .opencode/backlog/candidates.yaml
+      grep -n "publish-runtime-truth-readme" .opencode/backlog/candidates.yaml
+      grep -n "classify-screen-exports-reference" .opencode/backlog/candidates.yaml
+    acceptance:
+      - The active Candidate ID exists in backlog candidates.
+      - The founder priority order is recorded in one durable roadmap file.
+      - The phase-status command explicitly checks backlog/current-phase alignment.
+      - No stale candidate ID remains as the active phase after the update.
+
+  - id: publish-runtime-truth-readme
+    title: Add a current implemented surfaces section and honest runtime limitations to README
+    module: docs
+    priority: 90
+    files:
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: |
+      grep -n "Current implemented surfaces" README.md
+      grep -n "Not implemented yet" README.md
+    acceptance:
+      - README lists only shipped runtime routes and thin API routes as implemented.
+      - README explicitly separates implemented surfaces, placeholder flows, and future integrations.
+      - README explicitly notes lack of auth, host pairing, and persistence if those are still not implemented.
+
+  - id: classify-screen-exports-reference
+    title: Mark screens exports as design-reference artifacts and prevent them from overstating shipped maturity
+    module: screens
+    priority: 85
+    files:
+      - screens/README.md
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: |
+      grep -n "design-reference" screens/README.md
+      grep -n "screens/" README.md
+    acceptance:
+      - screens/README.md states that screens exports are design-reference artifacts, not runtime routes.
+      - README cross-links to screens with the same caveat.
+      - Wording no longer implies parity between screens exports and apps/web runtime implementation.
+
   - id: hub-mobile-shell
     title: Build the first mobile Hub shell with system status, quick actions, and activity cards
     module: apps/web
