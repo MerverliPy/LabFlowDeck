@@ -1,0 +1,67 @@
+selection_order:
+  - explicit_user_scope
+  - highest_priority
+  - same_module_followup
+  - smallest_safe_scope
+  - clearest_validation
+
+constraints:
+  max_files_changed: 6
+  prefer_single_module: true
+  avoid_generic_tasks: true
+
+candidates:
+  - id: hub-mobile-shell
+    title: Build the first mobile Hub shell with system status, quick actions, and activity cards
+    module: apps/web
+    priority: 10
+    files:
+      - apps/web/app/page.tsx
+      - apps/web/app/globals.css
+    validation: pnpm build:web
+    acceptance:
+      - Home page renders a coherent mobile-first Hub shell.
+      - The UI reflects LabFlowDeck status surfaces from SPEC.md.
+
+  - id: projects-list-shell
+    title: Add the Projects list shell with empty state and create-project CTA
+    module: apps/web
+    priority: 9
+    files:
+      - apps/web/app/projects/page.tsx
+      - apps/web/app/globals.css
+    validation: pnpm build:web
+    acceptance:
+      - Projects page renders stacked project cards or a guided empty state.
+
+  - id: agents-panel-shell
+    title: Add the Agents panel shell with workflow cards and run history summary
+    module: apps/web
+    priority: 8
+    files:
+      - apps/web/app/agents/page.tsx
+      - apps/web/app/globals.css
+    validation: pnpm build:web
+    acceptance:
+      - Agents page presents workflow cards and a creation entry point.
+
+  - id: deploy-panel-shell
+    title: Add the Deploy panel shell with service cards and health badges
+    module: apps/web
+    priority: 8
+    files:
+      - apps/web/app/deploy/page.tsx
+      - apps/web/app/globals.css
+    validation: pnpm build:web
+    acceptance:
+      - Deploy page presents service status with distinct runtime and health indicators.
+
+  - id: web-health-route
+    title: Add a thin health endpoint for the web app and surface build metadata
+    module: apps/web
+    priority: 7
+    files:
+      - apps/web/app/api/health/route.ts
+    validation: pnpm build:web
+    acceptance:
+      - Health route returns ok status and lightweight metadata.

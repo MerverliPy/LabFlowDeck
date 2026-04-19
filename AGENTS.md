@@ -1,60 +1,51 @@
-# AI Agent Instructions
+# AGENTS.md
 
-Your task is to implement **LabFlow Deck**. This application was specified and
-designed by the user in a tool called Mowgli (https://mowgli.ai). This directory
-contains the extracted contents of the Mowgli export.
+## Mission
 
-## Package Contents
+Build LabFlowDeck into a mobile-first operational control plane for AI-assisted software delivery, based on `SPEC.md`.
 
-This package contains:
-- `SPEC.md`: Complete application specification including user journeys, data model, and frontend screens
-- `screens/*.tsx`: React + Tailwind design mockups for each screen (static,
-  non-functional - use this as STRICT design reference as you go, but wire it up
-  properly)
-- `screens/images/`: Images used in the designs
+## Primary execution loop
 
-## How to Proceed
+- Orchestrator chooses the next bounded phase.
+- Builder implements the smallest viable change for that phase.
+- Validator checks the acceptance criteria and verification evidence.
+- Shipper prepares final summary and merge-ready framing.
 
-### If IMPLEMENTATION_PLAN.md does not exist:
+## Source of truth
 
-Before writing any code, interview the user to understand their level of
-technical prowess, project context, and technical preferences.
+- `SPEC.md` defines product behavior and mobile UX direction.
+- Existing mockups and design exports should guide layout and visual hierarchy.
+- `.opencode/backlog/candidates.yaml` defines prioritized implementation candidates.
+- `.opencode/plans/current-phase.md` is the only active phase state file.
 
-Start off by understanding if the contents of this package are standalone, or
-integrate with some existing project or codebase.
+## Repo priorities
 
-If the app is designed in a mobile fashion, understand if the user wants an
-ordinary React PWA, an Expo app (very common), or a native mobile app.
+1. Preserve alignment with `SPEC.md`.
+2. Prefer mobile-first UX over desktop abstractions.
+3. Keep each phase bounded and auditable.
+4. Favor single-module changes when possible.
+5. Do not invent large backend surfaces before the UI shell and workflow control plane are coherent.
 
-Make sure you understand the scope (frontend, backend, database, auth,
-deployment) and suggest good options if the user is non-technical (Next.js/Expo,
-Supabase, Vercel).
+## Rules
 
-Ask about any specific conventions or patterns they follow.
+- Do not store workflow state in ad hoc memory files.
+- Keep implementation phases concrete and validation-oriented.
+- Prefer one meaningful vertical slice at a time.
+- Update the backlog when scope or priority changes.
+- Avoid speculative multi-module refactors.
 
-If you have tools for asking user questions, use them.
+## Product boundaries for near-term phases
 
-After gathering requirements, create `IMPLEMENTATION_PLAN.md` with:
-- User context
-- Technical stack summary
-- Detailed implementation tasks organized vertically, by user journey (from the spec)
-- Checkboxes for each task so progress can be tracked
-- File structure plan
+In scope:
+- Hub, Projects, Agents, and Deploy shell
+- status cards and mobile-first layout
+- workflow selection and run-monitoring surfaces
+- host, deployment, and activity summaries
+- thin health/status route for the web app
 
-### If IMPLEMENTATION_PLAN.md exists:
-
-Continue implementation according to the plan:
-1. Read the plan and find the next uncompleted task
-2. Implement one chunk of work, following the spec and using the screen designs as reference
-3. Mark the task as complete with [x]
-4. Move to the next task
-
-## Important Notes
-
-- The screen `.tsx` files are **design mockups only** - they render static data and have no real functionality
-- The user has signed off on their visual appearance in Mowgli, so use them
-  extensively as visual reference + copy styling, but implement real data binding
-  and state management
-- The `SPEC.md` is the source of truth for behavior and requirements
-- When implementing a screen, refer to both the spec (for behavior) and the
-  `.tsx` file (for design)
+Out of scope for early phases:
+- full backend orchestration engine
+- full SSH implementation
+- production-grade Docker control plane
+- team collaboration and RBAC
+- multi-provider abstraction beyond GitHub-first assumptions
