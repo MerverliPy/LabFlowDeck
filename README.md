@@ -1,52 +1,64 @@
-# LabFlow Deck - Mowgli Export (v8)
+# LabFlowDeck
 
-This folder contains:
-  - SPEC.md: The specification for the app, written in Markdown.
-  - SPEC.pdf: PDF version of the SPEC.md file.
-  - screens/*.tsx: React components for each screen in the app.
-  - screens/images/: Images used in the screen designs.
+LabFlowDeck is a **mobile-first command center for AI-assisted software delivery**. It is designed for iPhone-sized screens and focuses on orchestrating GitHub-linked projects, workflow agents, remote hosts, and Docker-based deployments from a clean operational control plane.
 
-Read on for a brief description of these files.
+This repository now follows a **hybrid product + workflow** structure:
 
-## SPEC.md / SPEC.pdf
+- **Product scaffold**: a minimal Next.js web app in `apps/web`
+- **Workflow scaffold**: OpenCode-style agents, commands, backlog, and phase plan under `.opencode/`
+- **Product source of truth**: `SPEC.md`
+- **Architecture notes**: `docs/architecture/blueprint.md`
 
-A Mowgli spec is a Markdown file consisting of the following three sections:
-- User Journeys
-- Data Model
-- Frontend
+## Why this repo exists
 
-The User Journeys section describes scenarios for the app's users. Different
-scenarios might concern different user types (such as "visitor" and "admin").
-User Flows are organized and enumerated hierarchically, and they describe the
-user motivation and goal, preconditions, postconditions, and backend/frontend
-behavior for a particular scenario.
+The original repo content was a Mowgli export: a strong product specification and mockup-oriented starter. This scaffold turns that into a buildable platform repo with a delivery workflow that can incrementally ship the product.
 
-The Data Model section describes the data model of the application. It contains a
-subsection per entity, and each entity has a list of fields and relationships to
-other entities.
+## Current structure
 
-Finally, the Frontend section contains a subsection per frontend screen. Roughly
-speaking, a screen corresponds to a route. Each screen defines its contents
-briefly, and sometimes provides additional details on behavior. The screens are
-specified in more detail by the app design.
+- `SPEC.md` — product spec and UX scope
+- `apps/web` — mobile-first platform shell
+- `.opencode/agents` — role definitions for orchestrated development
+- `.opencode/commands` — phase workflow commands
+- `.opencode/backlog/candidates.yaml` — prioritized implementation queue
+- `.opencode/plans/current-phase.md` — active implementation phase
+- `AGENTS.md` — repo-level execution contract
 
-## Screen Code
+## Workflow model
 
-The screens are provided as .tsx files under the `screens` directory, one for
-each screen in the spec.
+The workflow is optimized for **high-signal, low-overhead implementation**:
 
-The app design is represented as a set of React components, each component
-corresponding to a screen from the Frontend section of the spec.
+1. **Orchestrator** selects the next bounded phase from backlog and writes the phase plan.
+2. **Builder** makes the smallest valid implementation needed to complete the phase.
+3. **Validator** checks acceptance criteria and required verification evidence.
+4. **Shipper** prepares final summary and commit/PR framing.
 
-The components do not render real data and do not implement any behaviors; they
-are, essentially, a static representation of the intended design. The code uses
-Tailwind for styling and lucide-react icons. If images are used in the design,
-they are provided alongside the screens.
+This keeps planning explicit, implementation bounded, and validation auditable.
 
-This setup allows the development process to proceed without the typical
-untangling and rewriting common in "vibe coded" projects — the screens use
-production-ready Tailwind styling, but the code is straightforward and
-non-functional. It makes no assumptions about the shape of the data, state
-management, backend, or coding style. Individual parts of each screen can be
-extracted into components as development progresses, and they are also a good
-starting point for further AI-assisted development, if needed.
+## Product direction
+
+Based on `SPEC.md`, LabFlowDeck targets these core areas:
+
+- GitHub-linked project control
+- Remote host pairing and monitoring
+- Agent workflow creation and execution
+- Docker/Compose deployment visibility and actions
+- Activity, execution logs, and mobile-friendly operational insight
+
+## Immediate next phase
+
+The repo is scaffolded to start with:
+
+- a mobile-first Hub experience
+- reusable platform cards and status sections
+- workflow/backlog infrastructure for iterative delivery
+
+## Local start
+
+```bash
+pnpm install
+pnpm dev:web
+```
+
+## Notes
+
+This is an intentionally thin first scaffold. It establishes the repo shape, execution workflow, and a credible product shell without pretending the full platform is already implemented.
