@@ -262,34 +262,162 @@ candidates:
       - README includes the new runtime route in the implemented surfaces list.
       - The web app build passes.
 
-  - id: project-detail-section-shells
-    title: Add section navigation and missing shell sections to the project detail route
-    status: completed
-    completion_note: Added a mobile section jump rail plus shell-only Runtime, Logs, and Stats sections to `/projects/[slug]`, added a focused route-level test, and passed web tests and build validation.
-    validation_result: passed
-    completed_at: 2026-04-20
-    evidence_refs:
-      - apps/web/app/projects/[slug]/page.tsx:16-23
-      - apps/web/app/projects/[slug]/page.tsx:58-70
-      - apps/web/app/projects/[slug]/page.tsx:118-236
-      - apps/web/app/projects/data.ts:42-86
-      - apps/web/app/projects/data.ts:129-210
-      - apps/web/app/projects/data.ts:251-332
-      - apps/web/app/projects/data.ts:373-454
-      - apps/web/app/globals.css:503-600
-      - apps/web/app/projects/[slug]/page.test.tsx:12-42
-      - .opencode/plans/current-phase.md:74-100
+  - id: deploy-live-adapter-seam
+    title: Replace simulated deploy status data with a real single-user adapter seam for one environment
+    status: pending
     module: apps/web
-    priority: 3
+    priority: 40
     files:
-      - apps/web/app/projects/[slug]/page.tsx
-      - apps/web/app/projects/[slug]/page.test.tsx
-      - apps/web/app/projects/data.ts
-      - apps/web/app/globals.css
+      - apps/web/app/deploy/data.ts
+      - apps/web/app/api/deploy/status/route.ts
+      - apps/web/app/api/deploy/actions/route.ts
+      - apps/web/app/deploy/types.ts
+      - apps/web/lib/deploy-adapter.ts
       - .opencode/plans/current-phase.md
-    validation: pnpm build:web
+    validation: |
+      pnpm build:web
     acceptance:
-      - The `/projects/[slug]` route exposes a mobile section navigation or jump rail for Repository, Runtime, Workflow, Deployments, Logs, and Stats.
-      - The detail page adds shell-only Runtime, Logs, and Stats sections using bounded data without introducing live command execution or log streaming.
-      - The route keeps the current overview information coherent on mobile and remains explicitly shell-only.
+      - The deploy data path reads from one configured server-side adapter instead of the hard-coded base deployment array.
+      - GET /api/deploy/status continues to satisfy the existing shell contract while returning adapter-backed data.
+      - POST /api/deploy/actions forwards one safe action type through the adapter and still rejects invalid payloads.
+      - The Deploy route remains mobile-first and the web app build passes.
+
+  - id: projects-store-read-path
+    title: Move the Projects shell onto a server-owned project store read path instead of in-file static arrays
+    status: pending
+    module: apps/web
+    priority: 38
+    files:
+      - apps/web/app/projects/data.ts
+      - apps/web/app/projects/page.tsx
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/app/projects/new/page.tsx
+      - apps/web/lib/project-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - The Projects list and project detail routes read through a server-owned project store or adapter rather than only hard-coded in-file arrays.
+      - Empty-state behavior is honest when no stored projects exist.
+      - The project detail route remains shell-only and does not introduce live GitHub or host control yet.
+      - The web app build passes.
+
+  - id: projects-new-persist-placeholder
+    title: Let the new project flow save a bounded placeholder project record for the single user
+    status: pending
+    module: apps/web
+    priority: 36
+    files:
+      - apps/web/app/projects/new/page.tsx
+      - apps/web/app/projects/actions.ts
+      - apps/web/app/projects/page.tsx
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/lib/project-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - The new project flow can save a bounded placeholder project record for the single user.
+      - A saved project appears on /projects after reload and resolves at /projects/[slug].
+      - The flow stays out of live GitHub repo discovery, host discovery, and service auto-detection for this phase.
+      - The web app build passes.
+
+  - id: github-auth-shell-session
+    title: Add a bounded GitHub login flow and session presence for the shell without claiming downstream repo integration
+    status: pending
+    module: apps/web
+    priority: 34
+    files:
+      - apps/web/app/login/page.tsx
+      - apps/web/app/auth/github/route.ts
+      - apps/web/app/auth/github/callback/route.ts
+      - apps/web/app/layout.tsx
+      - apps/web/lib/github-auth.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - Single-user GitHub OAuth can be initiated and completed with clear success and failure handling.
+      - The shell can detect whether a GitHub session exists without overstating downstream repo integration.
+      - Unauthenticated users are guided into login from the shell.
+      - The web app build passes.
+
+  - id: github-repo-picker-live-source
+    title: Add a bounded live GitHub repository picker to the new project flow
+    status: pending
+    module: apps/web
+    priority: 32
+    files:
+      - apps/web/app/projects/new/page.tsx
+      - apps/web/app/api/github/repos/route.ts
+      - apps/web/app/projects/actions.ts
+      - apps/web/lib/github.ts
+      - apps/web/lib/project-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - An authenticated user can fetch a bounded list of repositories from GitHub during project creation.
+      - The selected repository identifier is saved onto the placeholder project record.
+      - The phase does not add file-tree browsing, webhook sync, or full repo metadata ingestion yet.
+      - The web app build passes.
+
+  - id: host-heartbeat-shell-source
+    title: Add one bounded host heartbeat source so Hub and project detail stop relying on hard-coded host status text
+    status: pending
+    module: apps/web
+    priority: 30
+    files:
+      - apps/web/app/api/hosts/heartbeat/route.ts
+      - apps/web/app/page.tsx
+      - apps/web/app/projects/data.ts
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/lib/host-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - One configured host can report heartbeat and bounded health data to a server-side store.
+      - Hub and project detail surfaces read host status from stored heartbeat data instead of only hard-coded status text.
+      - Stale or missing heartbeat data maps to honest degraded or offline shell states.
+      - The web app build passes.
+
+  - id: activity-feed-live-source
+    title: Replace hard-coded recent activity arrays with a bounded stored activity feed for shell events
+    status: pending
+    module: apps/web
+    priority: 28
+    files:
+      - apps/web/app/page.tsx
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/app/api/deploy/actions/route.ts
+      - apps/web/app/projects/actions.ts
+      - apps/web/lib/activity-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - Hub and project detail recent-activity sections render stored activity events rather than only hard-coded arrays.
+      - Saving a project and accepted deploy actions emit bounded activity records.
+      - The feed remains single-user and shell-first without adding streaming logs yet.
+      - The web app build passes.
+
+  - id: workflow-save-and-run-history
+    title: Let the workflow shell save reusable workflows and record bounded manual run history
+    status: pending
+    module: apps/web
+    priority: 26
+    files:
+      - apps/web/app/agents/new/page.tsx
+      - apps/web/app/agents/page.tsx
+      - apps/web/app/agents/actions.ts
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/lib/workflow-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - The new workflow route can save a bounded reusable workflow record.
+      - A project can reference a saved workflow and show its current assignment.
+      - A manual placeholder run can create a persisted run-history record without introducing full background execution yet.
       - The web app build passes.
