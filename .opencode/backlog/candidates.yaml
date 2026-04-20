@@ -295,7 +295,17 @@ candidates:
 
   - id: projects-store-read-path
     title: Move the Projects shell onto a server-owned project store read path instead of in-file static arrays
-    status: pending
+    status: completed
+    completion_note: Added a bounded server-owned project store seam, routed Projects list/detail reads through it, preserved shell-only project flows, and made the list honest when no stored projects exist.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/app/projects/data.ts:1-109
+      - apps/web/lib/project-store.ts:375-410
+      - apps/web/app/projects/page.tsx:4-122
+      - apps/web/app/projects/[slug]/page.tsx:12-27
+      - apps/web/app/projects/new/page.tsx:193-195
+      - .opencode/plans/current-phase.md:91-126
     module: apps/web
     priority: 38
     files:

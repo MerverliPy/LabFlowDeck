@@ -191,7 +191,8 @@ export default function NewProjectPage() {
             <span className="badge badgeBlue">Placeholder</span>
           </div>
           <p className="subtle flowHint">
-            This phase only wires the CTA into a guided path. Real project persistence, repo lookup, and host-backed creation stay out of scope until live integration work begins.
+            Projects now read from a server-owned store, but this guided flow still does not persist new records.
+            Real project saving, repo lookup, and host-backed creation stay out of scope until a later phase.
           </p>
           <div className="flowActions">
             <Link className="secondaryCta ctaLink" href="/projects">

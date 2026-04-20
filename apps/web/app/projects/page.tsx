@@ -1,7 +1,11 @@
 import Link from 'next/link';
-import { projects } from './data';
+import { listProjects } from './data';
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await listProjects();
+  const healthyHostCount = projects.filter((project) => project.host.state === 'healthy').length;
+  const workflowCoverageCount = projects.filter((project) => project.workflow.state !== 'optional').length;
+
   return (
     <main className="shell">
       <section className="header">
@@ -24,11 +28,11 @@ export default function ProjectsPage() {
           <div className="metricRow">
             <div className="metric">
               <div className="metricLabel">Healthy hosts</div>
-              <div className="metricValue">2 / 3</div>
+              <div className="metricValue">{healthyHostCount} / {projects.length}</div>
             </div>
             <div className="metric">
               <div className="metricLabel">Workflow coverage</div>
-              <div className="metricValue">2 attached</div>
+              <div className="metricValue">{workflowCoverageCount} attached</div>
             </div>
           </div>
         </section>
@@ -47,48 +51,74 @@ export default function ProjectsPage() {
         </section>
 
         <section className="projectsStack" aria-label="Project list">
-          {projects.map((project) => (
-            <Link className="projectCardLink" href={`/projects/${project.slug}`} key={project.slug}>
-              <article className="card projectCard">
-                <div className="projectCardHeader">
-                  <div>
-                    <h2>{project.name}</h2>
-                    <p className="projectRepo">{project.repo}</p>
-                    <p className="listMeta">{project.branch} branch</p>
-                  </div>
-                  <span className={`badge ${project.host.badge}`}>{project.host.state}</span>
+          {projects.length === 0 ? (
+            <article className="card projectCard">
+              <div className="projectCardHeader">
+                <div>
+                  <h2>No stored projects yet</h2>
+                  <p className="projectRepo">Server-owned project store is empty</p>
+                  <p className="listMeta">Create flow remains guided-only in this phase</p>
                 </div>
+                <span className="badge badgeAmber">Empty</span>
+              </div>
 
-                <p className="subtle projectCardCopy">{project.summary}</p>
+              <p className="subtle projectCardCopy">
+                The Projects list now reflects the server-owned read path, so it stays empty until a later phase
+                adds placeholder persistence.
+              </p>
 
-                <div className="projectSignalGrid">
-                  <div className="projectSignal">
-                    <div className="projectSignalLabel">Host status</div>
-                    <div className="projectSignalValue">{project.host.label}</div>
+              <div className="projectBadges">
+                <span className="badge badgeAmber">0 stored</span>
+                <span className="badge badgeBlue">Guided setup available</span>
+                <Link className="primaryCta ctaLink" href="/projects/new">
+                  Start guided setup
+                </Link>
+              </div>
+            </article>
+          ) : (
+            projects.map((project) => (
+              <Link className="projectCardLink" href={`/projects/${project.slug}`} key={project.slug}>
+                <article className="card projectCard">
+                  <div className="projectCardHeader">
+                    <div>
+                      <h2>{project.name}</h2>
+                      <p className="projectRepo">{project.repo}</p>
+                      <p className="listMeta">{project.branch} branch</p>
+                    </div>
+                    <span className={`badge ${project.host.badge}`}>{project.host.state}</span>
                   </div>
-                  <div className="projectSignal">
-                    <div className="projectSignalLabel">Workflow</div>
-                    <div className="projectSignalValue">{project.workflow.label}</div>
-                  </div>
-                  <div className="projectSignal">
-                    <div className="projectSignalLabel">Last run</div>
-                    <div className="projectSignalValue">{project.lastRun.value}</div>
-                  </div>
-                  <div className="projectSignal">
-                    <div className="projectSignalLabel">Deployment</div>
-                    <div className="projectSignalValue">{project.deploy.value}</div>
-                  </div>
-                </div>
 
-                <div className="projectBadges">
-                  <span className={`badge ${project.workflow.badge}`}>{project.workflow.state}</span>
-                  <span className={`badge ${project.lastRun.badge}`}>{project.lastRun.label}</span>
-                  <span className={`badge ${project.deploy.badge}`}>{project.deploy.label}</span>
-                  <span className="projectCardHint">Open overview</span>
-                </div>
-              </article>
-            </Link>
-          ))}
+                  <p className="subtle projectCardCopy">{project.summary}</p>
+
+                  <div className="projectSignalGrid">
+                    <div className="projectSignal">
+                      <div className="projectSignalLabel">Host status</div>
+                      <div className="projectSignalValue">{project.host.label}</div>
+                    </div>
+                    <div className="projectSignal">
+                      <div className="projectSignalLabel">Workflow</div>
+                      <div className="projectSignalValue">{project.workflow.label}</div>
+                    </div>
+                    <div className="projectSignal">
+                      <div className="projectSignalLabel">Last run</div>
+                      <div className="projectSignalValue">{project.lastRun.value}</div>
+                    </div>
+                    <div className="projectSignal">
+                      <div className="projectSignalLabel">Deployment</div>
+                      <div className="projectSignalValue">{project.deploy.value}</div>
+                    </div>
+                  </div>
+
+                  <div className="projectBadges">
+                    <span className={`badge ${project.workflow.badge}`}>{project.workflow.state}</span>
+                    <span className={`badge ${project.lastRun.badge}`}>{project.lastRun.label}</span>
+                    <span className={`badge ${project.deploy.badge}`}>{project.deploy.label}</span>
+                    <span className="projectCardHint">Open overview</span>
+                  </div>
+                </article>
+              </Link>
+            ))
+          )}
         </section>
       </div>
 
