@@ -2,47 +2,52 @@
 
 Status: completed
 
-Candidate ID: web-health-route
+Candidate ID: decompose-deploy-client-surface
 
 ## Goal
 
-Add lightweight build metadata to the web health endpoint so operators can confirm which LabFlowDeck shell build is running without expanding backend scope.
+Reduce integration risk in the Deploy surface by splitting the oversized client route into smaller view and helper modules while keeping the existing mobile shell behavior unchanged.
 
 ## Why this phase is next
 
-The repo-state brief showed there is no active PR or CI context to continue from, so the safest next move is a small, auditable phase from the backlog. Current code shape shows the Hub, Projects, Agents, Deploy shell, screens caveats, and a thin health route already exist; the remaining bounded gap in the backlog is that `GET /api/health` does not yet expose build metadata promised by the candidate. This keeps scope to one module, aligns with the SPEC's control-plane monitoring needs, and has the clearest validation path.
+The `.opencode` state is now reconciled and the founder credibility fixes are complete, so the next safe move is a bounded same-module follow-up in `apps/web`. The Deploy route is the only interactive control-plane surface and currently concentrates filtering, formatting, confirmation, fetch, and rendering concerns in a single large client file. Splitting that module now reduces risk before more Deploy behavior is added, keeps scope within one feature area, and still has a clear build-based validation path.
 
 ## Primary files
 
-- apps/web/app/api/health/route.ts
+- apps/web/app/deploy/DeployPageClient.tsx
+- apps/web/app/deploy/presentation.tsx
+- apps/web/app/deploy/format.ts
+- apps/web/app/deploy/filters.ts
+- apps/web/app/deploy/types.ts
 - .opencode/plans/current-phase.md
 
 ## Expected max files changed
 
-2
+6
 
 ## Risk
 
-Low. This is a thin route-only change, with the main risk being exposing unstable or misleading metadata fields instead of simple, deterministic operator-facing values.
+Low to medium. This is a contained refactor inside one route module, with the main risk being accidental behavior drift in the existing filter and action flows while code is being decomposed.
 
 ## In scope
 
-- Extend `GET /api/health` with lightweight build/runtime metadata.
-- Keep the payload safe, static, and easy to inspect from an operator health check.
-- Document the phase and validation evidence in this phase file.
+- Split inline Deploy helper logic into small module-local helpers and/or presentation units.
+- Keep current deploy filters, action confirmation flow, and API request behavior intact.
+- Preserve the current mobile-first shell copy and visual structure.
+- Document the phase plan and validation path in this file.
 
 ## Out of scope
 
-- Adding authentication, persistence, or host-aware health checks.
-- Wiring the health route to external services, databases, or GitHub APIs.
-- Expanding deploy APIs or changing primary shell UI routes.
+- Adding new deploy actions, backend orchestration, persistence, or live Docker control.
+- Expanding into auth, host pairing, streaming logs, or new product routes.
+- Redesigning the Deploy shell or changing its existing API contracts.
 
 ## Tasks
 
-- Audit the current `apps/web/app/api/health/route.ts` payload against the backlog acceptance language.
-- Add bounded build metadata such as version/build identifier fields that can be derived safely at runtime.
-- Keep the response shape small and operator-readable.
-- Run the web build to verify the route still compiles cleanly.
+- Audit `apps/web/app/deploy/DeployPageClient.tsx` and identify extraction seams that preserve current behavior.
+- Move badge, format, filter, and action-label helpers out of the main client file.
+- Extract one or more Deploy presentation units so the page becomes easier to scan and maintain.
+- Verify the refactor preserves the current route contract and build health.
 
 ## Validation command
 
@@ -50,9 +55,10 @@ pnpm build:web
 
 ## Acceptance criteria
 
-- `GET /api/health` returns `ok` status plus lightweight build metadata.
-- The route remains a thin app-surface contract with no new backend dependencies.
-- The web app build passes after the route update.
+- The Deploy route keeps its existing shell behavior and thin API contract.
+- Inline badge, filter, and action-label helpers no longer live in the main client file.
+- The primary Deploy client file is materially smaller and easier to audit.
+- The web app build passes after the refactor.
 
 ## Validation
 
@@ -60,4 +66,4 @@ passed — `pnpm build:web`
 
 ## Completion summary
 
-Extended the thin web health route with compact operator-facing build metadata: app version from `apps/web/package.json`, a short commit identifier when deployment metadata is available, and the current runtime environment, while keeping the response bounded to the existing app shell.
+Refactored the Deploy surface into bounded module-local helpers and presentation components without changing the route contract. `DeployPageClient.tsx` now focuses on state and API flow only, shrinking from 489 lines to 165 while extracted `format.ts`, `filters.ts`, and `presentation.tsx` hold display and filtering logic.

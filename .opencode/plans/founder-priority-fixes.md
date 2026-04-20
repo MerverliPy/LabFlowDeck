@@ -1,6 +1,6 @@
 # Founder Priority Fixes
 
-Status: active
+Status: completed
 Owner: founder
 Workflow: OpenCode internal phase queue
 
@@ -17,9 +17,9 @@ Resolve the founder-level credibility and alignment gaps before adding more prod
 
 ## Progress snapshot
 
-- Completed: `patch-nextjs-security-line`, `reconcile-opencode-phase-state`
-- Next unresolved founder fix: `publish-runtime-truth-readme`
-- Remaining after that: `classify-screen-exports-reference`
+- Completed: `patch-nextjs-security-line`, `reconcile-opencode-phase-state`, `publish-runtime-truth-readme`, `classify-screen-exports-reference`
+- Next unresolved founder fix: none
+- Remaining after that: none
 
 ## Exit criteria
 
@@ -27,6 +27,10 @@ Resolve the founder-level credibility and alignment gaps before adding more prod
 - `.opencode/backlog/candidates.yaml` and `.opencode/plans/current-phase.md` are aligned.
 - README clearly distinguishes shipped runtime implementation from placeholder and planned work.
 - `screens/**` is clearly labeled as design-reference material rather than shipped runtime surface.
+
+## Completion note
+
+The founder credibility queue is complete. Repo-state documentation now matches the shipped shell, the screens exports are explicitly design-reference only, and phase selection can safely move back to bounded product work.
 
 ## Non-goals
 

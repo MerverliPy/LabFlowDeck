@@ -1,5 +1,10 @@
 export type DeployFilterStatus = 'all' | 'active' | 'unhealthy';
 
+export interface DeployFilterOption {
+  value: DeployFilterStatus;
+  label: string;
+}
+
 export type HostStatus = 'online' | 'degraded' | 'offline';
 
 export type RuntimeStatus = 'active' | 'deploying' | 'stopped' | 'error' | 'restarting';
@@ -76,4 +81,15 @@ export interface DeployActionResponse {
 export interface DeployControlAdapter {
   listStatuses(): Promise<DeployStatusResponse>;
   executeAction(input: DeployActionRequest): Promise<DeployActionResponse>;
+}
+
+export interface DeployPageClientProps {
+  initialData: DeployStatusResponse;
+}
+
+export interface PendingAction {
+  action: DeployAction;
+  targetType: DeployActionTargetType;
+  deployment: DeploymentStatus;
+  service?: DeployServiceStatus;
 }

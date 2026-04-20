@@ -79,6 +79,8 @@ candidates:
 
   - id: classify-screen-exports-reference
     title: Mark screens exports as design-reference artifacts and prevent them from overstating shipped maturity
+    status: completed
+    completion_note: Added an explicit screens README caveat and aligned the root README so design exports no longer imply shipped runtime parity.
     module: screens
     priority: 85
     files:
@@ -95,6 +97,8 @@ candidates:
 
   - id: hub-mobile-shell
     title: Build the first mobile Hub shell with system status, quick actions, and activity cards
+    status: completed
+    completion_note: Shipped the mobile Hub shell on `/` with system status, quick actions, workflow summary, host/deploy signals, and recent activity cards.
     module: apps/web
     priority: 10
     files:
@@ -107,6 +111,8 @@ candidates:
 
   - id: projects-list-shell
     title: Add the Projects list shell with empty state and create-project CTA
+    status: completed
+    completion_note: Shipped the Projects list shell with stacked project cards, summary metrics, and a guided create-project entry path.
     module: apps/web
     priority: 9
     files:
@@ -118,6 +124,8 @@ candidates:
 
   - id: agents-panel-shell
     title: Add the Agents panel shell with workflow cards and run history summary
+    status: completed
+    completion_note: Shipped the Agents shell with workflow cards, recent run summaries, and a workflow-creation entry point.
     module: apps/web
     priority: 8
     files:
@@ -129,6 +137,8 @@ candidates:
 
   - id: deploy-panel-shell
     title: Add the Deploy panel shell with service cards and health badges
+    status: completed
+    completion_note: Shipped the Deploy shell with project/service status cards, persisted filters, refresh, confirmation-gated actions, and thin API adapter seams.
     module: apps/web
     priority: 8
     files:
@@ -140,6 +150,8 @@ candidates:
 
   - id: web-health-route
     title: Add a thin health endpoint for the web app and surface build metadata
+    status: completed
+    completion_note: Extended `GET /api/health` with lightweight build metadata while keeping the route bounded to a thin shell-facing contract.
     module: apps/web
     priority: 7
     files:
@@ -147,3 +159,21 @@ candidates:
     validation: pnpm build:web
     acceptance:
       - Health route returns ok status and lightweight metadata.
+
+  - id: decompose-deploy-client-surface
+    title: Split the Deploy client into smaller view and helper modules without changing the shell contract
+    module: apps/web
+    priority: 6
+    files:
+      - apps/web/app/deploy/DeployPageClient.tsx
+      - apps/web/app/deploy/format.ts
+      - apps/web/app/deploy/filters.ts
+      - apps/web/app/deploy/presentation.tsx
+      - apps/web/app/deploy/types.ts
+      - .opencode/plans/current-phase.md
+    validation: pnpm build:web
+    acceptance:
+      - The Deploy route keeps its existing shell behavior and thin API contract.
+      - Inline badge, filter, and action-label helpers are extracted from the main client file.
+      - The primary Deploy client file becomes materially smaller and easier to audit.
+      - The web app build passes after the refactor.
