@@ -1,9 +1,19 @@
 import Link from 'next/link';
 
-import { STATUS_FILTERS, actionLabel, formatResourceUsage, formatUpdatedTime, getHealthBadge, getProjectSummary, getRuntimeBadge } from './format';
+import {
+  STATUS_FILTERS,
+  actionLabel,
+  formatPortBindings,
+  formatResourceUsage,
+  formatUpdatedTime,
+  getHealthBadge,
+  getProjectSummary,
+  getRuntimeBadge,
+} from './format';
 import type {
   DeployActionResponse,
   DeployFilterStatus,
+  DeployServiceStatus,
   DeploymentStatus,
   PendingAction,
 } from './types';
@@ -149,12 +159,12 @@ export function DeployFeedbackCard({ response, error }: DeployFeedbackCardProps)
 
 interface DeployProjectListProps {
   deployments: DeploymentStatus[];
-  onFilterChange: (key: 'project' | 'status', value: string) => void;
   onClearFilters: () => void;
   onOpenAction: (action: PendingAction) => void;
+  onSelectService: (deployment: DeploymentStatus, service: DeployServiceStatus) => void;
 }
 
-export function DeployProjectList({ deployments, onClearFilters, onOpenAction }: DeployProjectListProps) {
+export function DeployProjectList({ deployments, onClearFilters, onOpenAction, onSelectService }: DeployProjectListProps) {
   return (
     <section className="deployStack" aria-label="Deployment cards">
       {deployments.length === 0 ? (
@@ -221,7 +231,13 @@ export function DeployProjectList({ deployments, onClearFilters, onOpenAction }:
 
           <div className="serviceList" aria-label={`${deployment.projectName} services`}>
             {deployment.services.map((service) => (
-              <div className="serviceItem deployServiceItem" key={service.id}>
+              <button
+                aria-label={`Open ${service.name} details`}
+                className="serviceItem deployServiceButton deployServiceItem"
+                key={service.id}
+                onClick={() => onSelectService(deployment, service)}
+                type="button"
+              >
                 <div className="deployServiceBody">
                   <div>
                     <strong>{service.name}</strong>
@@ -230,11 +246,7 @@ export function DeployProjectList({ deployments, onClearFilters, onOpenAction }:
                         ? formatResourceUsage(service.resourceUsage.cpuPct, service.resourceUsage.memoryMb)
                         : 'No live resource sample'}
                     </div>
-                    {service.ports?.length ? (
-                      <div className="listMeta">
-                        {service.ports.map((port) => `${port.host}:${port.container}/${port.protocol}`).join(' · ')}
-                      </div>
-                    ) : null}
+                    {formatPortBindings(service.ports) ? <div className="listMeta">{formatPortBindings(service.ports)}</div> : null}
                     {service.previewUrl ? <div className="listMeta">Preview: {service.previewUrl}</div> : null}
                   </div>
                   <p className="subtle deployServiceLog">{service.logPreview}</p>
@@ -245,28 +257,123 @@ export function DeployProjectList({ deployments, onClearFilters, onOpenAction }:
                   <span className={`badge ${getHealthBadge(service.healthStatus)}`}>health {service.healthStatus}</span>
                 </div>
 
-                <div className="actionRow actionRowCompact">
-                  <button
-                    className="actionChip"
-                    onClick={() => onOpenAction({ action: 'restart', targetType: 'service', deployment, service })}
-                    type="button"
-                  >
-                    Restart
-                  </button>
-                  <button
-                    className="actionChip actionChipDanger"
-                    onClick={() => onOpenAction({ action: 'stop', targetType: 'service', deployment, service })}
-                    type="button"
-                  >
-                    Stop
-                  </button>
+                <div className="deployServiceFooter">
+                  <span className="badge badgeBlue">Tap for details</span>
+                  <span className="listMeta">Updated {formatUpdatedTime(service.lastUpdated)}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </article>
       ))}
     </section>
+  );
+}
+
+interface DeployServiceDetailSheetProps {
+  selectedService:
+    | {
+        deployment: DeploymentStatus;
+        service: DeployServiceStatus;
+      }
+    | null;
+  onClose: () => void;
+  onOpenAction: (action: PendingAction) => void;
+}
+
+export function DeployServiceDetailSheet({ selectedService, onClose, onOpenAction }: DeployServiceDetailSheetProps) {
+  if (!selectedService) {
+    return null;
+  }
+
+  const { deployment, service } = selectedService;
+  const portBindings = formatPortBindings(service.ports);
+
+  return (
+    <div className="sheetOverlay" role="presentation">
+      <section aria-labelledby="deploy-service-sheet-title" aria-modal="true" className="sheetCard deployServiceSheet" role="dialog">
+        <div className="cardTitle">
+          <div className="deployServiceSheetHeader">
+            <h2 id="deploy-service-sheet-title">{service.name}</h2>
+            <p className="projectRepo deployServiceSheetMeta">
+              {deployment.projectName} · {deployment.hostName}
+            </p>
+          </div>
+          <button className="secondaryInlineButton" onClick={onClose} type="button">
+            Close
+          </button>
+        </div>
+
+        <div className="deployBadgeGroup">
+          <span className={`badge ${getRuntimeBadge(service.runtimeStatus)}`}>runtime {service.runtimeStatus}</span>
+          <span className={`badge ${getHealthBadge(service.healthStatus)}`}>health {service.healthStatus}</span>
+          <span className={`badge ${getHealthBadge(deployment.hostStatus)}`}>host {deployment.hostStatus}</span>
+        </div>
+
+        <div className="deployProjectMeta">
+          <div className="projectSignal">
+            <div className="projectSignalLabel">Resource usage</div>
+            <div className="projectSignalValue">
+              {service.resourceUsage
+                ? formatResourceUsage(service.resourceUsage.cpuPct, service.resourceUsage.memoryMb)
+                : 'No live resource sample'}
+            </div>
+          </div>
+          <div className="projectSignal">
+            <div className="projectSignalLabel">Last update</div>
+            <div className="projectSignalValue">{formatUpdatedTime(service.lastUpdated)}</div>
+          </div>
+        </div>
+
+        <section className="fieldShell deployServiceDetailSection">
+          <div className="fieldLabel">Recent log preview</div>
+          <div className="fieldValue deployServiceDetailLog">{service.logPreview}</div>
+          <div className="listMeta">Thin control-plane preview only — full streaming logs stay out of scope.</div>
+        </section>
+
+        {service.previewUrl ? (
+          <section className="fieldShell deployServiceDetailSection">
+            <div className="fieldLabel">Preview URL</div>
+            <div className="fieldValue deployServiceDetailWrap">{service.previewUrl}</div>
+          </section>
+        ) : null}
+
+        {portBindings ? (
+          <section className="fieldShell deployServiceDetailSection">
+            <div className="fieldLabel">Ports</div>
+            <div className="fieldValue deployServiceDetailWrap">{portBindings}</div>
+          </section>
+        ) : null}
+
+        <section className="fieldShell deployServiceDetailSection">
+          <div className="fieldLabel">Project context</div>
+          <div className="fieldValue deployServiceDetailWrap">{deployment.repo}</div>
+          <div className="listMeta">{getProjectSummary(deployment)} across {deployment.serviceCount} tracked services</div>
+        </section>
+
+        <div className="flowActions">
+          <button className="secondaryCta" onClick={onClose} type="button">
+            Back to services
+          </button>
+          <div className="actionRow actionRowCompact">
+            <button
+              className="actionChip"
+              onClick={() => onOpenAction({ action: 'restart', targetType: 'service', deployment, service })}
+              type="button"
+            >
+              Restart service
+            </button>
+            <button
+              className="actionChip actionChipDanger"
+              onClick={() => onOpenAction({ action: 'stop', targetType: 'service', deployment, service })}
+              type="button"
+            >
+              Stop service
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 

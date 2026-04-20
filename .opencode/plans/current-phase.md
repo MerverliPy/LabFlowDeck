@@ -2,52 +2,54 @@
 
 Status: completed
 
-Candidate ID: decompose-deploy-client-surface
+Candidate ID: deploy-service-detail-sheet
 
 ## Goal
 
-Reduce integration risk in the Deploy surface by splitting the oversized client route into smaller view and helper modules while keeping the existing mobile shell behavior unchanged.
+Add a focused mobile service detail sheet inside the Deploy route so each tracked service can be inspected and acted on without leaving the control-plane shell.
 
 ## Why this phase is next
 
-The `.opencode` state is now reconciled and the founder credibility fixes are complete, so the next safe move is a bounded same-module follow-up in `apps/web`. The Deploy route is the only interactive control-plane surface and currently concentrates filtering, formatting, confirmation, fetch, and rendering concerns in a single large client file. Splitting that module now reduces risk before more Deploy behavior is added, keeps scope within one feature area, and still has a clear build-based validation path.
+The recent Deploy refactor reduced structure risk and left the route in a good state for one bounded same-module follow-up. `SPEC.md` calls for tapping a service to inspect detailed status, recent logs, preview URLs, and safe actions, while the current route only shows condensed service rows inline. This phase is the smallest meaningful next slice because it deepens the most mature interactive surface, stays within one module, and has a clear build-based validation path.
 
 ## Primary files
 
 - apps/web/app/deploy/DeployPageClient.tsx
 - apps/web/app/deploy/presentation.tsx
-- apps/web/app/deploy/format.ts
-- apps/web/app/deploy/filters.ts
 - apps/web/app/deploy/types.ts
+- apps/web/app/deploy/format.ts
 - .opencode/plans/current-phase.md
 
 ## Expected max files changed
 
-6
+5
 
 ## Risk
 
-Low to medium. This is a contained refactor inside one route module, with the main risk being accidental behavior drift in the existing filter and action flows while code is being decomposed.
+Low to medium. The work stays inside one existing route, with the main risk being state or interaction drift between the existing action-confirmation flow and the new service detail surface.
 
 ## In scope
 
-- Split inline Deploy helper logic into small module-local helpers and/or presentation units.
-- Keep current deploy filters, action confirmation flow, and API request behavior intact.
-- Preserve the current mobile-first shell copy and visual structure.
-- Document the phase plan and validation path in this file.
+- Add a mobile-first service detail sheet, drawer, or inline expansion within `/deploy`.
+- Allow selecting a service from the existing deployment list.
+- Show focused service details: runtime, health, resource usage, recent log preview, preview URL, and ports when available.
+- Reuse the existing confirmation-gated action flow from the new detail surface.
+- Preserve the current thin deploy API contract and shell-level routing.
 
 ## Out of scope
 
-- Adding new deploy actions, backend orchestration, persistence, or live Docker control.
-- Expanding into auth, host pairing, streaming logs, or new product routes.
-- Redesigning the Deploy shell or changing its existing API contracts.
+- New backend orchestration, polling models, or live Docker integration.
+- Full log streaming, service history pages, or separate nested deploy routes.
+- Changes to project, agents, or hub modules.
+- Auth, persistence, host pairing, or multi-user behavior.
 
 ## Tasks
 
-- Audit `apps/web/app/deploy/DeployPageClient.tsx` and identify extraction seams that preserve current behavior.
-- Move badge, format, filter, and action-label helpers out of the main client file.
-- Extract one or more Deploy presentation units so the page becomes easier to scan and maintain.
-- Verify the refactor preserves the current route contract and build health.
+- Audit the current deploy presentation seams and choose the smallest service-selection pattern that fits the mobile layout.
+- Add service selection state to the Deploy client and wire it to existing service rows.
+- Build a focused service detail surface in `presentation.tsx` using the current service data model.
+- Route existing service actions through the detail surface while preserving the current confirmation sheet behavior.
+- Verify the route still builds cleanly and remains coherent on mobile.
 
 ## Validation command
 
@@ -55,10 +57,10 @@ pnpm build:web
 
 ## Acceptance criteria
 
-- The Deploy route keeps its existing shell behavior and thin API contract.
-- Inline badge, filter, and action-label helpers no longer live in the main client file.
-- The primary Deploy client file is materially smaller and easier to audit.
-- The web app build passes after the refactor.
+- Tapping a service opens a focused mobile detail surface within the existing Deploy route.
+- The detail surface shows runtime status, health status, resource usage, recent log preview, and preview URL or ports when present.
+- Existing confirmation-gated service actions still work from the detail surface without changing the thin API contract.
+- The Deploy route remains mobile-first and the web app build passes.
 
 ## Validation
 
@@ -66,4 +68,4 @@ passed — `pnpm build:web`
 
 ## Completion summary
 
-Refactored the Deploy surface into bounded module-local helpers and presentation components without changing the route contract. `DeployPageClient.tsx` now focuses on state and API flow only, shrinking from 489 lines to 165 while extracted `format.ts`, `filters.ts`, and `presentation.tsx` hold display and filtering logic.
+Added a service detail sheet to the Deploy route, wired service-row taps to selection state in `DeployPageClient.tsx`, and moved restart/stop service actions into the focused detail surface while preserving the existing confirmation sheet and thin API adapter contract.

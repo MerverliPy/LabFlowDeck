@@ -277,12 +277,28 @@ h1 {
   flex-direction: column;
 }
 
+.deployServiceButton {
+  width: 100%;
+  appearance: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .deployServiceBody {
   width: 100%;
 }
 
 .deployServiceLog {
   margin: 8px 0 0;
+}
+
+.deployServiceFooter {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
 .deployBadgeGroup {
@@ -378,7 +394,7 @@ h1 {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  z-index: 20;
+  z-index: 60;
 }
 
 .sheetCard {
@@ -390,6 +406,31 @@ h1 {
   background: linear-gradient(180deg, rgba(30, 41, 59, 0.96), rgba(20, 27, 45, 1));
   padding: 18px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+.deployServiceSheet {
+  gap: 16px;
+}
+
+.deployServiceSheetHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.deployServiceSheetMeta {
+  margin: 0;
+}
+
+.deployServiceDetailSection {
+  display: grid;
+  gap: 8px;
+}
+
+.deployServiceDetailLog,
+.deployServiceDetailWrap {
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
 }
 
 .agentsRunItem {

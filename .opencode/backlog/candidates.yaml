@@ -162,6 +162,8 @@ candidates:
 
   - id: decompose-deploy-client-surface
     title: Split the Deploy client into smaller view and helper modules without changing the shell contract
+    status: completed
+    completion_note: Refactored the Deploy route into smaller helpers and presentation modules while preserving the shell contract and passing the web build.
     module: apps/web
     priority: 6
     files:
@@ -177,3 +179,20 @@ candidates:
       - Inline badge, filter, and action-label helpers are extracted from the main client file.
       - The primary Deploy client file becomes materially smaller and easier to audit.
       - The web app build passes after the refactor.
+
+  - id: deploy-service-detail-sheet
+    title: Add a mobile service detail sheet to the Deploy route for focused status, logs, and safe actions
+    module: apps/web
+    priority: 5
+    files:
+      - apps/web/app/deploy/DeployPageClient.tsx
+      - apps/web/app/deploy/presentation.tsx
+      - apps/web/app/deploy/types.ts
+      - apps/web/app/deploy/format.ts
+      - .opencode/plans/current-phase.md
+    validation: pnpm build:web
+    acceptance:
+      - Tapping a service opens a focused mobile detail sheet or panel within the existing Deploy route.
+      - The detail surface shows service runtime status, health status, resource usage, recent log preview, and preview URL or ports when present.
+      - Existing confirmation-gated deploy actions continue to work from the detail surface without changing the thin API contract.
+      - The Deploy route remains mobile-first and the web app build passes.

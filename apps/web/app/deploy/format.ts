@@ -5,6 +5,7 @@ import type {
   HealthStatus,
   HostStatus,
   RuntimeStatus,
+  ServicePort,
 } from './types';
 
 export const STATUS_FILTERS: DeployFilterOption[] = [
@@ -75,4 +76,12 @@ export function actionLabel(action: DeployAction) {
 
 export function formatUpdatedTime(value: string) {
   return new Date(value).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+}
+
+export function formatPortBindings(ports?: ServicePort[]) {
+  if (!ports?.length) {
+    return null;
+  }
+
+  return ports.map((port) => `${port.host}:${port.container}/${port.protocol}`).join(' · ');
 }

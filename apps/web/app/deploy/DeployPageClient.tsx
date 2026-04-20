@@ -8,16 +8,38 @@ import type {
   DeployActionResponse,
   DeployFilterStatus,
   DeployPageClientProps,
+  DeployServiceStatus,
+  DeploymentStatus,
   DeployStatusResponse,
   PendingAction,
 } from './types';
 import { countAttentionServices, countTrackedServices, filterDeployments } from './filters';
-import { ActionConfirmationSheet, DeployBottomNav, DeployControlCard, DeployFeedbackCard, DeployOverviewCard, DeployProjectList } from './presentation';
+
+import {
+  ActionConfirmationSheet,
+  DeployBottomNav,
+  DeployControlCard,
+  DeployFeedbackCard,
+  DeployOverviewCard,
+  DeployProjectList,
+  DeployServiceDetailSheet,
+} from './presentation';
+
+interface SelectedServiceState {
+  deploymentId: string;
+  serviceId: string;
+}
+
+interface SelectedServiceDetails {
+  deployment: DeploymentStatus;
+  service: DeployServiceStatus;
+}
 
 export default function DeployPageClient({ initialData }: DeployPageClientProps) {
   const [data, setData] = useState(initialData);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
+  const [selectedServiceState, setSelectedServiceState] = useState<SelectedServiceState | null>(null);
   const [isSubmittingAction, setIsSubmittingAction] = useState(false);
   const [actionResponse, setActionResponse] = useState<DeployActionResponse | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -35,6 +57,20 @@ export default function DeployPageClient({ initialData }: DeployPageClientProps)
   );
   const trackedServices = useMemo(() => countTrackedServices(data.deployments), [data.deployments]);
   const attentionServices = useMemo(() => countAttentionServices(data.deployments), [data.deployments]);
+  const selectedService = useMemo<SelectedServiceDetails | null>(() => {
+    if (!selectedServiceState) {
+      return null;
+    }
+
+    const deployment = data.deployments.find((item) => item.id === selectedServiceState.deploymentId);
+    const service = deployment?.services.find((item) => item.id === selectedServiceState.serviceId);
+
+    if (!deployment || !service) {
+      return null;
+    }
+
+    return { deployment, service };
+  }, [data.deployments, selectedServiceState]);
 
   const updateFilter = useCallback(
     (key: 'project' | 'status', value: string) => {
@@ -55,6 +91,23 @@ export default function DeployPageClient({ initialData }: DeployPageClientProps)
   const clearFilters = useCallback(() => {
     router.replace(pathname, { scroll: false });
   }, [pathname, router]);
+
+  const openPendingAction = useCallback((action: PendingAction) => {
+    setPendingAction(action);
+  }, []);
+
+  const openServiceDetails = useCallback((deployment: DeploymentStatus, service: DeployServiceStatus) => {
+    setSelectedServiceState({ deploymentId: deployment.id, serviceId: service.id });
+  }, []);
+
+  const closeServiceDetails = useCallback(() => {
+    setSelectedServiceState(null);
+  }, []);
+
+  const openServiceAction = useCallback((action: PendingAction) => {
+    setSelectedServiceState(null);
+    setPendingAction(action);
+  }, []);
 
   const refreshStatuses = useCallback(async () => {
     setIsRefreshing(true);
@@ -152,10 +205,16 @@ export default function DeployPageClient({ initialData }: DeployPageClientProps)
         <DeployProjectList
           deployments={filteredDeployments}
           onClearFilters={clearFilters}
-          onFilterChange={updateFilter}
-          onOpenAction={setPendingAction}
+          onOpenAction={openPendingAction}
+          onSelectService={openServiceDetails}
         />
       </div>
+
+      <DeployServiceDetailSheet
+        onClose={closeServiceDetails}
+        onOpenAction={openServiceAction}
+        selectedService={selectedService}
+      />
 
       <ActionConfirmationSheet
         isSubmittingAction={isSubmittingAction}
