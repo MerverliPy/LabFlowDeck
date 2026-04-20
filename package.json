@@ -6,6 +6,6 @@
     "dev:web": "pnpm --dir apps/web dev",
     "build:web": "pnpm --dir apps/web build",
     "lint:web": "pnpm --dir apps/web lint",
-    "typecheck:web": "pnpm --dir apps/web exec tsc --noEmit"
+    "typecheck:web": "pnpm --dir apps/web exec next typegen && pnpm --dir apps/web exec tsc --noEmit"
   }
 }
