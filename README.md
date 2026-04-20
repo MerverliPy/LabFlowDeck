@@ -45,6 +45,7 @@ Confirmed runtime routes in `apps/web`:
 
 - `/` — Hub shell with mobile-first status cards, quick actions, workflow summary, and recent activity
 - `/projects` — Projects list shell with stacked status cards and a create-project CTA
+- `/projects/[slug]` — project detail overview shell with repository, host, workflow, deployment, and activity summaries
 - `/projects/new` — guided project-creation placeholder flow
 - `/agents` — workflow list shell with recent run summaries
 - `/agents/new` — guided workflow-creation placeholder flow
@@ -61,6 +62,7 @@ Confirmed thin API routes in `apps/web/app/api`:
 Placeholder UI flows that currently ship as shell-only routes:
 
 - `/projects/new` does not browse GitHub, pair a real host, or persist a created project
+- `/projects/[slug]` does not browse repository files, stream runtime logs, or execute live workflow/deploy controls
 - `/agents/new` does not save workflows, edit reusable steps, schedule runs, or execute agents
 - `/deploy` uses a bounded adapter seam with simulated data and accepted action requests rather than live host or Docker control
 

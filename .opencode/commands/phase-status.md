@@ -1,16 +1,37 @@
 # /phase-status
 
-Inspect `.opencode/plans/current-phase.md` and report:
+Inspect `.opencode/plans/current-phase.md` and `.opencode/backlog/candidates.yaml`.
 
-- current candidate ID
-- whether that candidate exists in `.opencode/backlog/candidates.yaml`
-- whether backlog marks that candidate as `status: completed`
-- goal
-- status
-- remaining tasks
-- validation status
-- acceptance criteria state
+## Required output
 
-If the candidate ID in the current phase file does not exist in backlog candidates, report `FAIL: backlog/current-phase drift` before anything else.
+Emit a stable machine-readable JSON summary with these fields:
 
-If the candidate exists in backlog but is marked `status: completed`, report `FAIL: completed candidate still active` before anything else.
+- `candidate_id`
+- `current_phase_status`
+- `backlog_candidate_exists`
+- `backlog_marks_candidate_completed`
+- `drift_detected`
+- `open_task_count`
+- `completed_task_count`
+- `open_acceptance_count`
+- `completed_acceptance_count`
+- `missing_evidence_count`
+- `missing_sections`
+- `warnings`
+
+## Required checks
+
+- candidate exists in backlog
+- completed-state reconciliation between current-phase and backlog
+- open/completed task checklist counts
+- open/completed acceptance-criteria counts
+- missing evidence lines
+- missing required durable sections
+
+## Failure conditions
+
+Report failure before anything else when:
+
+- candidate is missing from backlog
+- current-phase is completed but backlog is not reconciled
+- backlog is completed while current-phase is still active

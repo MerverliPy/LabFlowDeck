@@ -232,6 +232,25 @@ h1 {
   gap: 14px;
 }
 
+.projectCardLink {
+  display: block;
+}
+
+.projectCardCopy,
+.detailLeadCopy,
+.detailSectionCopy,
+.detailActivityCopy {
+  margin: 0;
+}
+
+.projectCardHint {
+  margin-left: auto;
+  align-self: center;
+  font-size: 12px;
+  color: var(--cyan);
+  font-weight: 600;
+}
+
 .agentsStack,
 .workflowCard,
 .deployOverviewCard,
@@ -479,6 +498,69 @@ h1 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.detailHeaderCard,
+.detailSectionCard,
+.detailActivityList {
+  display: grid;
+  gap: 14px;
+}
+
+.detailHeaderCard {
+  margin-bottom: 14px;
+}
+
+.detailHeaderTopRow,
+.detailMetaRow,
+.detailActivityHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailBackLink {
+  width: fit-content;
+}
+
+.detailRepoMeta {
+  margin: 8px 0 10px;
+}
+
+.detailMetaList {
+  display: grid;
+  gap: 10px;
+}
+
+.detailMetaRow {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(159, 176, 199, 0.1);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.detailMetaLabel {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.detailActivityItem {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(159, 176, 199, 0.1);
+}
+
+.detailActivityHeader {
+  align-items: flex-start;
+}
+
+.detailActivityHeader h3 {
+  margin: 0;
+  font-size: 15px;
 }
 
 .flowIntroCard,

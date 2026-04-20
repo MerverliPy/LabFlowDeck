@@ -19,6 +19,9 @@ candidates:
     title: Patch the Next.js release line and record post-patch operator guidance
     status: completed
     completion_note: Updated to a patched Next.js 15.x release, regenerated the lockfile, and passed the web build.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 100
     files:
@@ -40,6 +43,9 @@ candidates:
     title: Reconcile backlog, current phase, and command-state so the OpenCode workflow is auditable again
     status: completed
     completion_note: Marked this governance fix complete after reconciling backlog/current-phase state, promoting the next unresolved founder fix into current-phase, and preserving grep-based validation evidence.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: .opencode
     priority: 95
     files:
@@ -64,6 +70,9 @@ candidates:
     title: Add a current implemented surfaces section and honest runtime limitations to README
     status: completed
     completion_note: Added an audited implemented-surfaces section, separated shell-only flows from future integrations, and explicitly documented missing auth, host pairing, and persistence.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: docs
     priority: 90
     files:
@@ -81,6 +90,9 @@ candidates:
     title: Mark screens exports as design-reference artifacts and prevent them from overstating shipped maturity
     status: completed
     completion_note: Added an explicit screens README caveat and aligned the root README so design exports no longer imply shipped runtime parity.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: screens
     priority: 85
     files:
@@ -99,6 +111,9 @@ candidates:
     title: Build the first mobile Hub shell with system status, quick actions, and activity cards
     status: completed
     completion_note: Shipped the mobile Hub shell on `/` with system status, quick actions, workflow summary, host/deploy signals, and recent activity cards.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 10
     files:
@@ -113,6 +128,9 @@ candidates:
     title: Add the Projects list shell with empty state and create-project CTA
     status: completed
     completion_note: Shipped the Projects list shell with stacked project cards, summary metrics, and a guided create-project entry path.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 9
     files:
@@ -126,6 +144,9 @@ candidates:
     title: Add the Agents panel shell with workflow cards and run history summary
     status: completed
     completion_note: Shipped the Agents shell with workflow cards, recent run summaries, and a workflow-creation entry point.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 8
     files:
@@ -139,6 +160,9 @@ candidates:
     title: Add the Deploy panel shell with service cards and health badges
     status: completed
     completion_note: Shipped the Deploy shell with project/service status cards, persisted filters, refresh, confirmation-gated actions, and thin API adapter seams.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 8
     files:
@@ -152,6 +176,9 @@ candidates:
     title: Add a thin health endpoint for the web app and surface build metadata
     status: completed
     completion_note: Extended `GET /api/health` with lightweight build metadata while keeping the route bounded to a thin shell-facing contract.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 7
     files:
@@ -164,6 +191,9 @@ candidates:
     title: Split the Deploy client into smaller view and helper modules without changing the shell contract
     status: completed
     completion_note: Refactored the Deploy route into smaller helpers and presentation modules while preserving the shell contract and passing the web build.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 6
     files:
@@ -182,6 +212,11 @@ candidates:
 
   - id: deploy-service-detail-sheet
     title: Add a mobile service detail sheet to the Deploy route for focused status, logs, and safe actions
+    status: completed
+    completion_note: Added a focused mobile service detail sheet in the Deploy route, preserved confirmation-gated actions, and passed `pnpm build:web`.
+    validation_result: legacy_backfill_pending
+    completed_at: legacy_backfill_pending
+    evidence_refs: []
     module: apps/web
     priority: 5
     files:
@@ -196,3 +231,33 @@ candidates:
       - The detail surface shows service runtime status, health status, resource usage, recent log preview, and preview URL or ports when present.
       - Existing confirmation-gated deploy actions continue to work from the detail surface without changing the thin API contract.
       - The Deploy route remains mobile-first and the web app build passes.
+
+  - id: project-detail-overview-shell
+    title: Add a mobile project detail overview route linked from the Projects list
+    status: completed
+    completion_note: Linked the Projects list cards to a new mobile overview route, added shared shell data for project detail summaries, documented the runtime route in README, and passed `pnpm build:web`.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/app/projects/page.tsx:49-90
+      - apps/web/app/projects/[slug]/page.tsx:22-167
+      - apps/web/app/projects/data.ts:54-257
+      - apps/web/app/globals.css:503-565
+      - README.md:42-49
+      - .opencode/plans/current-phase.md:75-98
+    module: apps/web
+    priority: 4
+    files:
+      - apps/web/app/projects/page.tsx
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/app/projects/data.ts
+      - apps/web/app/globals.css
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: pnpm build:web
+    acceptance:
+      - Project cards in `/projects` link to a dedicated mobile detail route.
+      - The detail route shows project identity, repository summary, linked host status, workflow summary, deployment summary, and recent activity in a mobile-first layout.
+      - The route stays shell-only and does not introduce live GitHub, host, or persistence integrations.
+      - README includes the new runtime route in the implemented surfaces list.
+      - The web app build passes.

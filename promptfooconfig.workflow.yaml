@@ -1,0 +1,145 @@
+description: LabFlowDeck workflow audit
+
+prompts:
+  - |
+      Audit the LabFlowDeck workflow implementation, not the product features.
+
+      Inspect:
+      - AGENTS.md
+      - opencode.json
+      - .opencode/backlog/candidates.yaml
+      - .opencode/plans/current-phase.md
+      - .opencode/commands/phase-status.md
+      - .opencode/commands/next-phase.md
+      - .opencode/commands/finish-phase.md
+
+      Return only JSON.
+
+      Required output:
+      - repo_summary
+      - workflow_state
+      - weak_points
+      - next_action
+
+      Requirements:
+      - Ground every conclusion in repository files you actually inspected.
+      - Detect workflow-state drift between backlog and current-phase.
+      - Identify 2 to 4 highest-value workflow improvements for reliability, auditability, or validation strength.
+      - Recommend the next maintainer action as a concrete command.
+
+providers:
+  - id: opencode:sdk
+    config:
+      baseUrl: http://127.0.0.1:4096
+      working_dir: .
+      agent: orchestrator
+      tools:
+        read: true
+        grep: true
+        glob: true
+        list: true
+      permission:
+        external_directory: deny
+        doom_loop: deny
+      format:
+        type: json_schema
+        schema:
+          type: object
+          additionalProperties: false
+          properties:
+            repo_summary:
+              type: string
+            workflow_state:
+              type: object
+              additionalProperties: false
+              properties:
+                current_candidate_id:
+                  type: string
+                current_phase_status:
+                  type: string
+                backlog_candidate_exists:
+                  type: boolean
+                backlog_marks_candidate_completed:
+                  type: boolean
+                drift_detected:
+                  type: boolean
+                evidence_files:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - current_candidate_id
+                - current_phase_status
+                - backlog_candidate_exists
+                - backlog_marks_candidate_completed
+                - drift_detected
+                - evidence_files
+            weak_points:
+              type: array
+              minItems: 2
+              items:
+                type: object
+                additionalProperties: false
+                properties:
+                  title:
+                    type: string
+                  severity:
+                    type: string
+                  files:
+                    type: array
+                    items:
+                      type: string
+                  reason:
+                    type: string
+                  improvement:
+                    type: string
+                required:
+                  - title
+                  - severity
+                  - files
+                  - reason
+                  - improvement
+            next_action:
+              type: object
+              additionalProperties: false
+              properties:
+                command:
+                  type: string
+                reason:
+                  type: string
+              required:
+                - command
+                - reason
+          required:
+            - repo_summary
+            - workflow_state
+            - weak_points
+            - next_action
+
+tests:
+  - assert:
+      - type: contains-json
+      - type: javascript
+        value: |
+          const obj = typeof output === 'string' ? JSON.parse(output) : output;
+          const wf = obj.workflow_state || {};
+          const weakPoints = Array.isArray(obj.weak_points) ? obj.weak_points : [];
+          const nextAction = obj.next_action || {};
+          const evidence = Array.isArray(wf.evidence_files) ? wf.evidence_files : [];
+          const findingFiles = weakPoints.flatMap((item) => Array.isArray(item.files) ? item.files : []);
+          const groundedFiles = [...new Set([...evidence, ...findingFiles])];
+          const grounded =
+            groundedFiles.includes('.opencode/plans/current-phase.md') &&
+            groundedFiles.includes('.opencode/backlog/candidates.yaml');
+
+          return {
+            pass:
+              grounded &&
+              weakPoints.length >= 2 &&
+              typeof nextAction.command === 'string' &&
+              nextAction.command.trim().length > 0,
+            reason: `grounded=${grounded}; weak_points=${weakPoints.length}; next_action=${nextAction.command || 'missing'}`
+          };
+
+evaluateOptions:
+  maxConcurrency: 1

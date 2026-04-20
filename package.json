@@ -6,6 +6,20 @@
     "dev:web": "pnpm --dir apps/web dev",
     "build:web": "pnpm --dir apps/web build",
     "lint:web": "pnpm --dir apps/web lint",
-    "typecheck:web": "pnpm --dir apps/web exec next typegen && pnpm --dir apps/web exec tsc --noEmit"
+    "typecheck:web": "pnpm --dir apps/web exec next typegen && pnpm --dir apps/web exec tsc --noEmit",
+    "test:web": "pnpm --dir apps/web test",
+    "workflow:audit:deterministic": "bash scripts/audit-workflow-state.sh",
+    "workflow:audit:agent": "promptfoo eval -c promptfooconfig.workflow.yaml --no-cache",
+    "workflow:audit:agent:repeat": "promptfoo eval -c promptfooconfig.workflow.yaml --no-cache --repeat 3",
+    "workflow:audit:view": "promptfoo view",
+    "workflow:audit": "pnpm workflow:audit:deterministic && pnpm workflow:audit:opencode",
+    "workflow:audit:opencode": "bash scripts/audit-workflow-opencode.sh",
+    "workflow:phase-lint": "bash scripts/validate-current-phase-structure.sh",
+    "workflow:phase-status": "python3 scripts/phase-status-json.py",
+    "workflow:archive-phase": "bash scripts/archive-current-phase.sh"
+  },
+  "devDependencies": {
+    "@opencode-ai/sdk": "^1.14.19",
+    "promptfoo": "^0.121.5"
   }
 }

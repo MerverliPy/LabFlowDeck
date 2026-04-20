@@ -1,34 +1,5 @@
 import Link from 'next/link';
-
-const projects = [
-  {
-    name: 'LabFlowDeck',
-    repo: 'calvin/labflowdeck',
-    branch: 'main',
-    host: { label: 'Home server', state: 'healthy', badge: 'badgeGreen' },
-    workflow: { label: 'Build + Validate', state: 'attached', badge: 'badgeBlue' },
-    lastRun: { label: 'Last run', value: 'Passed 12m ago', badge: 'badgeGreen' },
-    deploy: { label: 'Deploy', value: '3 services healthy', badge: 'badgeGreen' },
-  },
-  {
-    name: 'PromptShield',
-    repo: 'calvin/promptshield',
-    branch: 'release',
-    host: { label: 'Edge host', state: 'degraded', badge: 'badgeAmber' },
-    workflow: { label: 'Nightly inspect', state: 'scheduled', badge: 'badgeBlue' },
-    lastRun: { label: 'Last run', value: 'Needs review 48m ago', badge: 'badgeAmber' },
-    deploy: { label: 'Deploy', value: '1 unhealthy container', badge: 'badgeRed' },
-  },
-  {
-    name: 'SignalDesk',
-    repo: 'calvin/signaldesk',
-    branch: 'main',
-    host: { label: 'Build host', state: 'healthy', badge: 'badgeGreen' },
-    workflow: { label: 'No workflow attached', state: 'optional', badge: 'badgeAmber' },
-    lastRun: { label: 'Last run', value: 'Not run yet', badge: 'badgeAmber' },
-    deploy: { label: 'Deploy', value: 'Ready for first target', badge: 'badgeBlue' },
-  },
-];
+import { projects } from './data';
 
 export default function ProjectsPage() {
   return (
@@ -77,41 +48,46 @@ export default function ProjectsPage() {
 
         <section className="projectsStack" aria-label="Project list">
           {projects.map((project) => (
-            <article className="card projectCard" key={project.name}>
-              <div className="projectCardHeader">
-                <div>
-                  <h2>{project.name}</h2>
-                  <p className="projectRepo">{project.repo}</p>
-                  <p className="listMeta">{project.branch} branch</p>
+            <Link className="projectCardLink" href={`/projects/${project.slug}`} key={project.slug}>
+              <article className="card projectCard">
+                <div className="projectCardHeader">
+                  <div>
+                    <h2>{project.name}</h2>
+                    <p className="projectRepo">{project.repo}</p>
+                    <p className="listMeta">{project.branch} branch</p>
+                  </div>
+                  <span className={`badge ${project.host.badge}`}>{project.host.state}</span>
                 </div>
-                <span className={`badge ${project.host.badge}`}>{project.host.state}</span>
-              </div>
 
-              <div className="projectSignalGrid">
-                <div className="projectSignal">
-                  <div className="projectSignalLabel">Host status</div>
-                  <div className="projectSignalValue">{project.host.label}</div>
-                </div>
-                <div className="projectSignal">
-                  <div className="projectSignalLabel">Workflow</div>
-                  <div className="projectSignalValue">{project.workflow.label}</div>
-                </div>
-                <div className="projectSignal">
-                  <div className="projectSignalLabel">Last run</div>
-                  <div className="projectSignalValue">{project.lastRun.value}</div>
-                </div>
-                <div className="projectSignal">
-                  <div className="projectSignalLabel">Deployment</div>
-                  <div className="projectSignalValue">{project.deploy.value}</div>
-                </div>
-              </div>
+                <p className="subtle projectCardCopy">{project.summary}</p>
 
-              <div className="projectBadges">
-                <span className={`badge ${project.workflow.badge}`}>{project.workflow.state}</span>
-                <span className={`badge ${project.lastRun.badge}`}>{project.lastRun.label}</span>
-                <span className={`badge ${project.deploy.badge}`}>{project.deploy.label}</span>
-              </div>
-            </article>
+                <div className="projectSignalGrid">
+                  <div className="projectSignal">
+                    <div className="projectSignalLabel">Host status</div>
+                    <div className="projectSignalValue">{project.host.label}</div>
+                  </div>
+                  <div className="projectSignal">
+                    <div className="projectSignalLabel">Workflow</div>
+                    <div className="projectSignalValue">{project.workflow.label}</div>
+                  </div>
+                  <div className="projectSignal">
+                    <div className="projectSignalLabel">Last run</div>
+                    <div className="projectSignalValue">{project.lastRun.value}</div>
+                  </div>
+                  <div className="projectSignal">
+                    <div className="projectSignalLabel">Deployment</div>
+                    <div className="projectSignalValue">{project.deploy.value}</div>
+                  </div>
+                </div>
+
+                <div className="projectBadges">
+                  <span className={`badge ${project.workflow.badge}`}>{project.workflow.state}</span>
+                  <span className={`badge ${project.lastRun.badge}`}>{project.lastRun.label}</span>
+                  <span className={`badge ${project.deploy.badge}`}>{project.deploy.label}</span>
+                  <span className="projectCardHint">Open overview</span>
+                </div>
+              </article>
+            </Link>
           ))}
         </section>
       </div>
