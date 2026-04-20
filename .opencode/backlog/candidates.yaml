@@ -264,7 +264,18 @@ candidates:
 
   - id: deploy-live-adapter-seam
     title: Replace simulated deploy status data with a real single-user adapter seam for one environment
-    status: pending
+    status: completed
+    completion_note: Replaced the in-file deploy fixture source with a configured single-environment adapter seam, preserved the thin Deploy API contract, and limited forwarded actions to one safe deployment-level case.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/app/deploy/data.ts:1-15
+      - apps/web/lib/deploy-adapter.ts:143-170
+      - apps/web/lib/deploy-adapter.ts:189-246
+      - apps/web/app/api/deploy/status/route.ts:1-6
+      - apps/web/app/api/deploy/actions/route.ts:9-59
+      - apps/web/app/deploy/types.ts:67-97
+      - .opencode/plans/current-phase.md:104-126
     module: apps/web
     priority: 40
     files:

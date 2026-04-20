@@ -11,9 +11,19 @@ export type RuntimeStatus = 'active' | 'deploying' | 'stopped' | 'error' | 'rest
 
 export type HealthStatus = 'healthy' | 'warning' | 'unhealthy' | 'unknown' | 'pending';
 
-export type DeployAction = 'deploy' | 'rebuild' | 'restart' | 'stop';
+export const DEPLOY_ACTION_VALUES = ['deploy', 'rebuild', 'restart', 'stop'] as const;
 
-export type DeployActionTargetType = 'deployment' | 'service';
+export type DeployAction = (typeof DEPLOY_ACTION_VALUES)[number];
+
+export const DEPLOY_ACTION_TARGET_VALUES = ['deployment', 'service'] as const;
+
+export type DeployActionTargetType = (typeof DEPLOY_ACTION_TARGET_VALUES)[number];
+
+export type DeployStatusMode = 'control-plane-shell' | 'adapter-control-plane';
+
+export type DeployActionMode = 'simulated-control-plane' | 'adapter-control-plane';
+
+export type DeployAdapterSource = 'fixture-fallback' | 'configured-json';
 
 export interface ResourceUsage {
   cpuPct: number;
@@ -56,9 +66,11 @@ export interface DeploymentStatus {
 
 export interface DeployStatusResponse {
   ok: true;
-  mode: 'control-plane-shell';
+  mode: DeployStatusMode;
   generatedAt: string;
   refreshHintMs: number;
+  targetEnvironment?: string;
+  adapterSource?: DeployAdapterSource;
   deployments: DeploymentStatus[];
 }
 
@@ -74,8 +86,10 @@ export interface DeployActionResponse {
   status: 'accepted' | 'rejected';
   operationId: string;
   message: string;
-  mode: 'simulated-control-plane';
+  mode: DeployActionMode;
   nextPollHintMs: number;
+  targetEnvironment?: string;
+  adapterSource?: DeployAdapterSource;
 }
 
 export interface DeployControlAdapter {
