@@ -7,10 +7,48 @@
     "edit": "ask",
     "bash": "ask"
   },
-  "instructions": ["AGENTS.md"],
   "compaction": {
     "auto": true,
     "prune": true,
     "reserved": 12000
+  },
+  "instructions": ["AGENTS.md"],
+  "mcp": {
+    "github_readonly": {
+      "enabled": false
+    },
+    "github": {
+      "type": "local",
+      "command": [
+        "docker",
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "-e",
+        "GITHUB_TOOLSETS",
+        "-e",
+        "GITHUB_READ_ONLY",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "{env:GITHUB_PERSONAL_ACCESS_TOKEN}",
+        "GITHUB_TOOLSETS": "context,repos,issues,pull_requests,actions,code_security",
+        "GITHUB_READ_ONLY": "1"
+      },
+      "enabled": true,
+      "timeout": 20000
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{env:CONTEXT7_API_KEY}"
+      },
+      "oauth": false,
+      "enabled": true,
+      "timeout": 20000
+    }
   }
 }
