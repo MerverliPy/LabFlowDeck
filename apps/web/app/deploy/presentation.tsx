@@ -150,10 +150,11 @@ export function DeployFeedbackCard({ response, error }: DeployFeedbackCardProps)
 interface DeployProjectListProps {
   deployments: DeploymentStatus[];
   onFilterChange: (key: 'project' | 'status', value: string) => void;
+  onClearFilters: () => void;
   onOpenAction: (action: PendingAction) => void;
 }
 
-export function DeployProjectList({ deployments, onFilterChange, onOpenAction }: DeployProjectListProps) {
+export function DeployProjectList({ deployments, onClearFilters, onOpenAction }: DeployProjectListProps) {
   return (
     <section className="deployStack" aria-label="Deployment cards">
       {deployments.length === 0 ? (
@@ -167,10 +168,7 @@ export function DeployProjectList({ deployments, onFilterChange, onOpenAction }:
           </p>
           <button
             className="secondaryCta"
-            onClick={() => {
-              onFilterChange('project', 'all');
-              onFilterChange('status', 'all');
-            }}
+            onClick={onClearFilters}
             type="button"
           >
             Clear filters

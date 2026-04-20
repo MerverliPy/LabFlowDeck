@@ -52,6 +52,10 @@ export default function DeployPageClient({ initialData }: DeployPageClientProps)
     [pathname, router, searchParams]
   );
 
+  const clearFilters = useCallback(() => {
+    router.replace(pathname, { scroll: false });
+  }, [pathname, router]);
+
   const refreshStatuses = useCallback(async () => {
     setIsRefreshing(true);
     setActionError(null);
@@ -147,6 +151,7 @@ export default function DeployPageClient({ initialData }: DeployPageClientProps)
 
         <DeployProjectList
           deployments={filteredDeployments}
+          onClearFilters={clearFilters}
           onFilterChange={updateFilter}
           onOpenAction={setPendingAction}
         />
