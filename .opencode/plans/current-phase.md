@@ -2,48 +2,47 @@
 
 Status: completed
 
+Candidate ID: web-health-route
+
 ## Goal
 
-Stabilize the mobile shell navigation so the fixed bottom nav stays tappable and no longer overlaps primary content on the Hub, Projects, and Agents screens.
+Add lightweight build metadata to the web health endpoint so operators can confirm which LabFlowDeck shell build is running without expanding backend scope.
 
 ## Why this phase is next
 
-The latest browser audit found a core mobile usability issue: the bottom nav can overlap content and, at small viewport sizes, even interfere with basic tab switching. This is the clearest same-module follow-up to the existing shell work, directly supports the SPEC's mobile-first direction, and has a small, practical validation surface.
+The repo-state brief showed there is no active PR or CI context to continue from, so the safest next move is a small, auditable phase from the backlog. Current code shape shows the Hub, Projects, Agents, Deploy shell, screens caveats, and a thin health route already exist; the remaining bounded gap in the backlog is that `GET /api/health` does not yet expose build metadata promised by the candidate. This keeps scope to one module, aligns with the SPEC's control-plane monitoring needs, and has the clearest validation path.
 
 ## Primary files
 
-- apps/web/app/globals.css
-- apps/web/app/page.tsx
-- apps/web/app/projects/page.tsx
-- apps/web/app/agents/page.tsx
+- apps/web/app/api/health/route.ts
+- .opencode/plans/current-phase.md
 
 ## Expected max files changed
 
-4
+2
 
 ## Risk
 
-Low. The change is presentation-focused, but shared shell CSS touches multiple primary routes, so spacing regressions across the mobile shell are the main risk.
+Low. This is a thin route-only change, with the main risk being exposing unstable or misleading metadata fields instead of simple, deterministic operator-facing values.
 
 ## In scope
 
-- Reserve reliable bottom safe-area space for the fixed nav on mobile screens.
-- Ensure the nav stays visually above page content and remains easy to tap.
-- Apply any small route markup adjustments needed on Hub, Projects, and Agents to support the shared shell fix.
+- Extend `GET /api/health` with lightweight build/runtime metadata.
+- Keep the payload safe, static, and easy to inspect from an operator health check.
+- Document the phase and validation evidence in this phase file.
 
 ## Out of scope
 
-- Wiring the Hub quick-action buttons to real behavior.
-- Adding route-specific metadata titles or favicon assets.
-- Reworking the Deploy page interaction model.
-- Broad desktop-layout refactors or shared-component extraction.
+- Adding authentication, persistence, or host-aware health checks.
+- Wiring the health route to external services, databases, or GitHub APIs.
+- Expanding deploy APIs or changing primary shell UI routes.
 
 ## Tasks
 
-- Audit the shared shell spacing and bottom-nav positioning rules in `apps/web/app/globals.css`.
-- Adjust shell padding, safe-area handling, and nav layering for mobile viewports.
-- Make the smallest route-level markup updates needed on Hub, Projects, and Agents.
-- Re-check that content is not obscured by the fixed nav across the affected routes.
+- Audit the current `apps/web/app/api/health/route.ts` payload against the backlog acceptance language.
+- Add bounded build metadata such as version/build identifier fields that can be derived safely at runtime.
+- Keep the response shape small and operator-readable.
+- Run the web build to verify the route still compiles cleanly.
 
 ## Validation command
 
@@ -51,15 +50,14 @@ pnpm build:web
 
 ## Acceptance criteria
 
-- Hub, Projects, and Agents reserve enough bottom space that card content is not hidden behind the fixed nav on mobile.
-- The bottom nav remains visible and tappable across those screens at mobile widths.
-- The change stays bounded to the existing `apps/web` shell surface and does not introduce new backend behavior.
+- `GET /api/health` returns `ok` status plus lightweight build metadata.
+- The route remains a thin app-surface contract with no new backend dependencies.
+- The web app build passes after the route update.
 
 ## Validation
 
 passed — `pnpm build:web`
-passed — Playwright mobile verification confirmed the fixed bottom nav remained tappable and left visible clearance above the last card on `/`, `/projects`, `/agents`, and `/deploy`
 
 ## Completion summary
 
-Adjusted the shared mobile shell spacing so the fixed bottom nav no longer covers end-of-page content, and disabled the unstable Next dev segment explorer so local runtime validation remains reliable.
+Extended the thin web health route with compact operator-facing build metadata: app version from `apps/web/package.json`, a short commit identifier when deployment metadata is available, and the current runtime environment, while keeping the response bounded to the existing app shell.
