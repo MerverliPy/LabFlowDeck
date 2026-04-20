@@ -261,3 +261,35 @@ candidates:
       - The route stays shell-only and does not introduce live GitHub, host, or persistence integrations.
       - README includes the new runtime route in the implemented surfaces list.
       - The web app build passes.
+
+  - id: project-detail-section-shells
+    title: Add section navigation and missing shell sections to the project detail route
+    status: completed
+    completion_note: Added a mobile section jump rail plus shell-only Runtime, Logs, and Stats sections to `/projects/[slug]`, added a focused route-level test, and passed web tests and build validation.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/app/projects/[slug]/page.tsx:16-23
+      - apps/web/app/projects/[slug]/page.tsx:58-70
+      - apps/web/app/projects/[slug]/page.tsx:118-236
+      - apps/web/app/projects/data.ts:42-86
+      - apps/web/app/projects/data.ts:129-210
+      - apps/web/app/projects/data.ts:251-332
+      - apps/web/app/projects/data.ts:373-454
+      - apps/web/app/globals.css:503-600
+      - apps/web/app/projects/[slug]/page.test.tsx:12-42
+      - .opencode/plans/current-phase.md:74-100
+    module: apps/web
+    priority: 3
+    files:
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/app/projects/[slug]/page.test.tsx
+      - apps/web/app/projects/data.ts
+      - apps/web/app/globals.css
+      - .opencode/plans/current-phase.md
+    validation: pnpm build:web
+    acceptance:
+      - The `/projects/[slug]` route exposes a mobile section navigation or jump rail for Repository, Runtime, Workflow, Deployments, Logs, and Stats.
+      - The detail page adds shell-only Runtime, Logs, and Stats sections using bounded data without introducing live command execution or log streaming.
+      - The route keeps the current overview information coherent on mobile and remains explicitly shell-only.
+      - The web app build passes.

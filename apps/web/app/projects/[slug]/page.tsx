@@ -13,6 +13,15 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
   const { slug } = await params;
   const project = getProjectBySlug(slug);
 
+  const sectionLinks = [
+    { href: '#repository', label: 'Repository' },
+    { href: '#runtime', label: 'Runtime' },
+    { href: '#workflow', label: 'Workflow' },
+    { href: '#deployments', label: 'Deployments' },
+    { href: '#logs', label: 'Logs' },
+    { href: '#stats', label: 'Stats' },
+  ];
+
   if (!project) {
     notFound();
   }
@@ -46,8 +55,22 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
         </div>
       </section>
 
+      <section className="card detailSectionNavCard" aria-label="Project sections">
+        <div className="cardTitle">
+          <h2>Jump to section</h2>
+          <span className="subtle">Thumb-first navigation</span>
+        </div>
+        <div className="detailSectionNav">
+          {sectionLinks.map((section) => (
+            <a className="detailSectionLink" href={section.href} key={section.href}>
+              {section.label}
+            </a>
+          ))}
+        </div>
+      </section>
+
       <div className="grid">
-        <section className="card detailSectionCard">
+        <section className="card detailSectionCard" id="repository">
           <div className="cardTitle">
             <h2>Repository</h2>
             <span className="badge badgeBlue">Shell data</span>
@@ -92,7 +115,36 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
         </section>
 
-        <section className="card detailSectionCard">
+        <section className="card detailSectionCard" id="runtime">
+          <div className="cardTitle">
+            <h2>Runtime</h2>
+            <span className={`badge ${project.runtime.badge}`}>{project.runtime.state}</span>
+          </div>
+          <p className="subtle detailSectionCopy">{project.runtime.detail}</p>
+          <div className="detailMetaList">
+            <div className="detailMetaRow">
+              <span className="detailMetaLabel">Session</span>
+              <span>{project.runtime.session}</span>
+            </div>
+            <div className="detailMetaRow">
+              <span className="detailMetaLabel">Action profile</span>
+              <span>{project.runtime.commandProfile}</span>
+            </div>
+            <div className="detailMetaRow detailMetaRowStacked">
+              <span className="detailMetaLabel">Output preview</span>
+              <span className="detailWrapText">{project.runtime.outputPreview}</span>
+            </div>
+          </div>
+          <div className="detailBadgeRow" aria-label="Runtime action shells">
+            {project.runtime.actions.map((action) => (
+              <span className={`badge ${action.badge}`} key={action.label}>
+                {action.label} · {action.state}
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <section className="card detailSectionCard" id="workflow">
           <div className="cardTitle">
             <h2>Workflow</h2>
             <span className={`badge ${project.workflow.badge}`}>{project.workflow.state}</span>
@@ -114,9 +166,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           </div>
         </section>
 
-        <section className="card detailSectionCard">
+        <section className="card detailSectionCard" id="deployments">
           <div className="cardTitle">
-            <h2>Deployment</h2>
+            <h2>Deployments</h2>
             <span className={`badge ${project.deploy.badge}`}>{project.deploy.value}</span>
           </div>
           <div className="detailMetaList">
@@ -132,6 +184,54 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <span className="detailMetaLabel">Updated</span>
               <span>{project.deploy.updated}</span>
             </div>
+          </div>
+        </section>
+
+        <section className="card detailSectionCard" id="logs">
+          <div className="cardTitle">
+            <h2>Logs</h2>
+            <span className="badge badgeBlue">Shell summaries</span>
+          </div>
+          <p className="subtle detailSectionCopy">{project.logs.summary}</p>
+          <div className="detailActivityList" aria-label="Project logs">
+            {project.logs.items.map((item) => (
+              <div className="detailActivityItem" key={`${item.time}-${item.title}`}>
+                <div>
+                  <div className="detailActivityHeader">
+                    <h3>{item.title}</h3>
+                    <span className={`badge ${item.badge}`}>{item.time}</span>
+                  </div>
+                  <p className="detailLogMeta">
+                    {item.source} · {item.severity}
+                  </p>
+                  <p className="subtle detailActivityCopy">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="card detailSectionCard" id="stats">
+          <div className="cardTitle">
+            <h2>Stats</h2>
+            <span className="badge badgeBlue">Compact shell view</span>
+          </div>
+          <p className="subtle detailSectionCopy">{project.stats.summary}</p>
+          <div className="projectSignalGrid">
+            {project.stats.highlights.map((stat) => (
+              <div className="projectSignal" key={stat.label}>
+                <div className="projectSignalLabel">{stat.label}</div>
+                <div className="projectSignalValue">{stat.value}</div>
+              </div>
+            ))}
+          </div>
+          <div className="detailMetaList">
+            {project.stats.rows.map((row) => (
+              <div className="detailMetaRow" key={row.label}>
+                <span className="detailMetaLabel">{row.label}</span>
+                <span>{row.value}</span>
+              </div>
+            ))}
           </div>
         </section>
 
@@ -161,8 +261,8 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             <span className="badge badgeAmber">No live integrations</span>
           </div>
           <p className="subtle detailSectionCopy">
-            This overview is intentionally shell-only. Repository browsing, runtime controls, live workflow runs,
-            and real deployment execution stay out of scope for this phase.
+            This project detail view is intentionally shell-only. Repository browsing, live terminals, log streaming,
+            workflow execution, and real deployment actions stay out of scope for this phase.
           </p>
         </section>
       </div>
