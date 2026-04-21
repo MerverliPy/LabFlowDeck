@@ -29,3 +29,25 @@ Completion is blocked unless:
 - validation result is recorded
 - backlog reconciliation succeeds
 - archive step succeeds
+
+<!-- validation-reconciliation-gate -->
+## Validation command reconciliation gate
+
+Before marking a candidate completed, `/finish-phase` must reconcile the validation command recorded in the backlog with the final validation command recorded in the phase record.
+
+### Required checks
+1. Read the final executed validation command from `.opencode/plans/current-phase.md`.
+2. Read the matching candidate's `validation` field from `.opencode/backlog/candidates.yaml`.
+3. Normalize only leading and trailing whitespace.
+4. Require exact string equality after normalization.
+
+### Failure rule
+If the two validation commands differ, refuse completion. Do not archive the phase, do not overwrite the backlog entry, and do not mark the candidate completed.
+
+### Refusal result
+Return a refusal result containing:
+- `reason: backlog validation does not match final phase validation`
+- `expected_validation: <value from current-phase>`
+- `backlog_validation: <value from backlog>`
+
+The operator must update backlog validation first, then rerun `/finish-phase`.

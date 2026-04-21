@@ -39,7 +39,10 @@ This keeps planning explicit, implementation bounded, and validation auditable.
 
 The repo's internal OpenCode workflow path can be switched manually between OpenAI and GitHub Copilot without hand-editing multiple files:
 
-```bash
+```
+
+`LABFLOWDECK_SESSION_SECRET` signs the app session cookies and should not reuse `GITHUB_CLIENT_SECRET`.
+bash
 pnpm workflow:provider -- openai
 pnpm workflow:provider -- copilot
 pnpm workflow:provider -- current
@@ -112,9 +115,13 @@ pnpm dev:web
 
 To enable the bounded GitHub login flow, configure these environment variables before running the web app:
 
+`LABFLOWDECK_SESSION_SECRET` signs the app session cookies and should not reuse `GITHUB_CLIENT_SECRET`.
+
 ```bash
+LABFLOWDECK_SESSION_SECRET=your_long_random_session_secret
 GITHUB_CLIENT_ID=your_github_oauth_app_client_id
 GITHUB_CLIENT_SECRET=your_github_oauth_app_client_secret
+GITHUB_OAUTH_SCOPE=read:user repo
 ```
 
 The default OAuth request now supports the bounded repo picker by asking GitHub for user identity plus repository access needed to list selectable repos for the single-user shell.

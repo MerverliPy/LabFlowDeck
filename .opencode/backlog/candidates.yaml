@@ -576,8 +576,7 @@ candidates:
       - apps/web/lib/workflow-store.ts
       - apps/web/lib/activity-store.ts
       - .opencode/plans/current-phase.md
-    validation: |
-      pnpm build:web
+    validation: "pnpm --dir apps/web test && pnpm build:web"
     acceptance:
       - Creating a bounded manual workflow run writes a matching activity record to the activity store.
       - Project detail and workflow surfaces can render the recorded event without claiming background execution.
