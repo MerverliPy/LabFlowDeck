@@ -1,4 +1,7 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
+
+import { getHostHeartbeatResponse } from '../lib/host-store';
 
 const quickActions = [
   {
@@ -36,7 +39,17 @@ const activity = [
   { title: 'Workflow validation warning', meta: 'Build + Validate · 37m ago', status: 'badgeAmber', label: 'warn' },
 ];
 
-export default function HomePage() {
+function markHubDynamic() {
+  if (process.env.NODE_ENV !== 'test') {
+    noStore();
+  }
+}
+
+export default async function HomePage() {
+  markHubDynamic();
+  const hostHeartbeat = await getHostHeartbeatResponse();
+  const hostSummary = hostHeartbeat.summary;
+
   return (
     <main className="shell">
       <section className="header">
@@ -47,7 +60,7 @@ export default function HomePage() {
             Mobile-first command center for GitHub-linked projects, workflows, hosts, and deployments.
           </p>
         </div>
-        <div className="badge badgeGreen">Healthy</div>
+        <div className={`badge ${hostSummary.badge}`}>{hostSummary.headline}</div>
       </section>
 
       <div className="grid">
@@ -63,7 +76,9 @@ export default function HomePage() {
             </div>
             <div className="metric">
               <div className="metricLabel">Connected hosts</div>
-              <div className="metricValue">2</div>
+              <div className="metricValue">
+                {hostSummary.connectedCount} / {hostSummary.totalCount}
+              </div>
             </div>
             <div className="metric">
               <div className="metricLabel">Tracked services</div>
@@ -71,7 +86,7 @@ export default function HomePage() {
             </div>
             <div className="metric">
               <div className="metricLabel">Critical alerts</div>
-              <div className="metricValue">1</div>
+              <div className="metricValue">{hostSummary.alertCount}</div>
             </div>
           </div>
         </section>
@@ -115,13 +130,15 @@ export default function HomePage() {
         <section className="card">
           <div className="cardTitle">
             <h2>Hosts + deploy</h2>
-            <span className="badge badgeAmber">1 alert</span>
+            <span className={`badge ${hostSummary.badge}`}>{hostSummary.alertCount} alert{hostSummary.alertCount === 1 ? '' : 's'}</span>
           </div>
           <div className="splitRow">
             <div className="metric">
               <div className="metricLabel">Host status</div>
-              <div className="metricValue">1 healthy</div>
-              <div className="subtle">1 degraded host needs review</div>
+              <div className="metricValue">
+                {hostSummary.healthyCount} healthy · {hostSummary.degradedCount} degraded · {hostSummary.offlineCount} offline
+              </div>
+              <div className="subtle">{hostSummary.detail}</div>
             </div>
             <div className="metric">
               <div className="metricLabel">Deployments</div>

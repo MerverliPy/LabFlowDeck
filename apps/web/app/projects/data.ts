@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from 'next/cache';
 
+import { getHostHeartbeatByLabel } from '../../lib/host-store';
 import { getProjectStore } from '../../lib/project-store';
 
 export type ProjectCardBadge = 'badgeBlue' | 'badgeGreen' | 'badgeAmber' | 'badgeRed';
@@ -98,12 +99,41 @@ function markProjectReadsDynamic() {
   }
 }
 
+async function applyStoredHostHeartbeat(project: ProjectOverview) {
+  const storedHost = await getHostHeartbeatByLabel(project.host.label);
+
+  return {
+    ...project,
+    host: {
+      ...project.host,
+      state: storedHost.state,
+      badge: storedHost.badge,
+      detail: storedHost.detail,
+      heartbeat: storedHost.heartbeat,
+    },
+    metrics: project.metrics.map((metric) =>
+      metric.label === 'Host latency'
+        ? {
+            ...metric,
+            value: storedHost.latencyLabel,
+          }
+        : metric
+    ),
+  };
+}
+
 export async function listProjects() {
   markProjectReadsDynamic();
-  return projectStore.listProjects();
+  return Promise.all((await projectStore.listProjects()).map(applyStoredHostHeartbeat));
 }
 
 export async function getProjectBySlug(slug: string) {
   markProjectReadsDynamic();
-  return projectStore.getProjectBySlug(slug);
+  const project = await projectStore.getProjectBySlug(slug);
+
+  if (!project) {
+    return null;
+  }
+
+  return applyStoredHostHeartbeat(project);
 }

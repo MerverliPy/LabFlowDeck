@@ -391,7 +391,17 @@ candidates:
 
   - id: host-heartbeat-shell-source
     title: Add one bounded host heartbeat source so Hub and project detail stop relying on hard-coded host status text
-    status: pending
+    status: completed
+    completion_note: Added a bounded stored host-heartbeat seam plus a thin `/api/hosts/heartbeat` route, then routed Hub and project detail host summaries through stored heartbeat state instead of hard-coded text.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - apps/web/lib/host-store.ts:218-307
+      - apps/web/app/api/hosts/heartbeat/route.ts:1-6
+      - apps/web/app/page.tsx:42-149
+      - apps/web/app/projects/data.ts:102-139
+      - apps/web/app/projects/[slug]/page.tsx:100-114
+      - README.md:61-76
     module: apps/web
     priority: 30
     files:
