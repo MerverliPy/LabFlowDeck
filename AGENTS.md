@@ -1,5 +1,7 @@
 # AGENTS.md
 
+> Internal workflow provider switch reminder: see `README.md` → `## Internal workflow provider switch` for the manual `pnpm workflow:provider -- openai|copilot|current` commands.
+
 ## Mission
 Build LabFlowDeck into a mobile-first operational control plane for AI-assisted software delivery, aligned to `SPEC.md`, while keeping the shipped runtime honest about what is and is not live.
 
