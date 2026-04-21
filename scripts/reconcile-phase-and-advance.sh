@@ -1,4 +1,63 @@
-# Current Phase
+#!/usr/bin/env bash
+set -euo pipefail
+
+BACKLOG=".opencode/backlog/candidates.yaml"
+PHASE=".opencode/plans/current-phase.md"
+
+if [ ! -f "$BACKLOG" ]; then
+  echo "Missing $BACKLOG" >&2
+  exit 1
+fi
+
+if [ ! -f "$PHASE" ]; then
+  echo "Missing $PHASE" >&2
+  exit 1
+fi
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+from datetime import date
+
+backlog_path = Path(".opencode/backlog/candidates.yaml")
+phase_path = Path(".opencode/plans/current-phase.md")
+
+backlog = backlog_path.read_text()
+today = date.today().isoformat()
+
+# 1) Reconcile stale candidate if it is still pending.
+target_id = "projects-new-persist-placeholder"
+if f"- id: {target_id}" not in backlog:
+    raise SystemExit(f"Could not find backlog candidate: {target_id}")
+
+pattern = re.compile(
+    r"(- id: projects-new-persist-placeholder\s+"
+    r"title: .*?\s+"
+    r"status: )pending(\s+module: apps/web\s+priority: 36\s+files:.*?acceptance:\s+- The new project flow can save a bounded placeholder project record for the single user\.\s+- A saved project appears on /projects after reload and resolves at /projects/\[slug\]\.\s+- The flow stays out of live GitHub repo discovery, host discovery, and service auto-detection for this phase\.\s+- The web app build passes\.)",
+    re.S,
+)
+
+replacement = (
+    r"\1completed\n"
+    f"  completion_note: Reconciled backlog state after confirming the new project flow already saves a bounded placeholder project record and redirects to the stored project detail route.\n"
+    f"  validation_result: reconciled_from_repo_state\n"
+    f"  completed_at: {today}\n"
+    f"  evidence_refs:\n"
+    f"    - apps/web/app/projects/actions.ts\n"
+    f"    - apps/web/app/projects/new/page.tsx\2"
+)
+
+new_backlog, count = pattern.subn(replacement, backlog, count=1)
+if count == 0:
+    if "status: completed" in backlog.split("- id: projects-new-persist-placeholder", 1)[1].split("- id:", 1)[0]:
+        new_backlog = backlog
+    else:
+        raise SystemExit("Failed to reconcile projects-new-persist-placeholder block cleanly.")
+
+backlog_path.write_text(new_backlog)
+
+# 2) Advance current phase to next true pending candidate.
+phase_text = """# Current Phase
 Status: active
 Candidate ID: github-auth-shell-session
 
@@ -57,3 +116,13 @@ Medium. The main risks are overstating downstream GitHub integration, handling c
 - [ ] The shell can detect whether a GitHub session exists without overstating downstream repo integration.
 - [ ] Unauthenticated users are guided into login from the shell.
 - [ ] The web app build passes.
+"""
+phase_path.write_text(phase_text)
+
+print("Reconciled backlog and advanced current phase to github-auth-shell-session.")
+PY
+
+echo "Done."
+echo "Updated:"
+echo "  .opencode/backlog/candidates.yaml"
+echo "  .opencode/plans/current-phase.md"

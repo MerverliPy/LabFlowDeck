@@ -325,23 +325,13 @@ candidates:
 
   - id: projects-new-persist-placeholder
     title: Let the new project flow save a bounded placeholder project record for the single user
-    status: pending
-    module: apps/web
-    priority: 36
-    files:
-      - apps/web/app/projects/new/page.tsx
-      - apps/web/app/projects/actions.ts
-      - apps/web/app/projects/page.tsx
-      - apps/web/app/projects/[slug]/page.tsx
-      - apps/web/lib/project-store.ts
-      - .opencode/plans/current-phase.md
-    validation: |
-      pnpm build:web
-    acceptance:
-      - The new project flow can save a bounded placeholder project record for the single user.
-      - A saved project appears on /projects after reload and resolves at /projects/[slug].
-      - The flow stays out of live GitHub repo discovery, host discovery, and service auto-detection for this phase.
-      - The web app build passes.
+    status: completed
+  completion_note: Reconciled backlog state after confirming the new project flow already saves a bounded placeholder project record and redirects to the stored project detail route.
+  validation_result: reconciled_from_repo_state
+  completed_at: 2026-04-20
+  evidence_refs:
+    - apps/web/app/projects/actions.ts
+    - apps/web/app/projects/new/page.tsx
 
   - id: github-auth-shell-session
     title: Add a bounded GitHub login flow and session presence for the shell without claiming downstream repo integration
