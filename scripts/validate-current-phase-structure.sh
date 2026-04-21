@@ -25,9 +25,9 @@ require_section() {
 status="$(awk -F': ' '/^Status:/ {print $2; exit}' "$phase_file" | tr '[:upper:]' '[:lower:]')"
 
 case "${status:-}" in
-  planned|in_progress|blocked|completed) ;;
+  planned|in_progress|active|blocked|completed) ;;
   *)
-    echo "FAIL: Status must be one of planned, in_progress, blocked, completed"
+    echo "FAIL: Status must be one of planned, in_progress, active, blocked, completed"
     fail=1
     ;;
 esac
