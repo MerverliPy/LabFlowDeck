@@ -326,16 +326,27 @@ candidates:
   - id: projects-new-persist-placeholder
     title: Let the new project flow save a bounded placeholder project record for the single user
     status: completed
-  completion_note: Reconciled backlog state after confirming the new project flow already saves a bounded placeholder project record and redirects to the stored project detail route.
-  validation_result: reconciled_from_repo_state
-  completed_at: 2026-04-20
-  evidence_refs:
-    - apps/web/app/projects/actions.ts
-    - apps/web/app/projects/new/page.tsx
+    completion_note: Reconciled backlog state after confirming the new project flow already saves a bounded placeholder project record and redirects to the stored project detail route.
+    validation_result: reconciled_from_repo_state
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/app/projects/actions.ts
+      - apps/web/app/projects/new/page.tsx
 
   - id: github-auth-shell-session
     title: Add a bounded GitHub login flow and session presence for the shell without claiming downstream repo integration
-    status: pending
+    status: completed
+    completion_note: Added bounded GitHub OAuth initiation and callback routes, surfaced signed shell session presence in the layout and `/login`, and updated README truth plus setup guidance without claiming live repo sync.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/lib/github-auth.ts
+      - apps/web/app/auth/github/route.ts
+      - apps/web/app/auth/github/callback/route.ts
+      - apps/web/app/layout.tsx
+      - apps/web/app/login/page.tsx
+      - README.md
+      - .opencode/plans/current-phase.md
     module: apps/web
     priority: 34
     files:
@@ -355,7 +366,22 @@ candidates:
 
   - id: github-repo-picker-live-source
     title: Add a bounded live GitHub repository picker to the new project flow
-    status: pending
+    status: completed
+    completion_note: Added a bounded GitHub repository list seam and API route, surfaced live repo choices in the project-creation flow with honest fallback states, and saved picker-selected repository identifiers onto placeholder project records.
+    validation_result: passed
+    completed_at: 2026-04-20
+    evidence_refs:
+      - apps/web/lib/github.ts
+      - apps/web/lib/github.test.ts
+      - apps/web/app/api/github/repos/route.ts
+      - apps/web/app/projects/new/page.tsx
+      - apps/web/app/projects/actions.ts
+      - apps/web/lib/project-store.ts
+      - apps/web/app/auth/github/callback/route.ts
+      - apps/web/lib/github-auth.ts
+      - apps/web/lib/github-auth.test.ts
+      - README.md
+      - .opencode/plans/current-phase.md
     module: apps/web
     priority: 32
     files:
@@ -432,60 +458,60 @@ candidates:
       - A project can reference a saved workflow and show its current assignment.
       - A manual placeholder run can create a persisted run-history record without introducing full background execution yet.
       - The web app build passes.
-- id: project-host-picker-shell-source
-  title: Add a bounded host picker to the new project flow using stored host heartbeat records
-  status: pending
-  module: apps/web
-  priority: 24
-  files:
-    - apps/web/app/projects/new/page.tsx
-    - apps/web/app/api/hosts/list/route.ts
-    - apps/web/app/projects/actions.ts
-    - apps/web/lib/host-store.ts
-    - apps/web/lib/project-store.ts
-    - .opencode/plans/current-phase.md
-  validation: |
-    pnpm build:web
-  acceptance:
-    - The new project flow can fetch and present a bounded list of stored hosts for single-user selection.
-    - The selected host identifier is saved onto the placeholder project record.
-    - The phase does not add SSH execution, agent installation, or multi-host orchestration yet.
-    - The web app build passes.
-- id: deploy-project-link-shell
-  title: Add bounded project linkage from Deploy cards into the project detail shell
-  status: pending
-  module: apps/web
-  priority: 22
-  files:
-    - apps/web/app/deploy/page.tsx
-    - apps/web/app/deploy/types.ts
-    - apps/web/app/deploy/presentation.tsx
-    - apps/web/lib/deploy-adapter.ts
-    - README.md
-    - .opencode/plans/current-phase.md
-  validation: |
-    pnpm build:web
-  acceptance:
-    - Deploy cards can show bounded project identity when available from the adapter seam.
-    - A deploy surface can link into /projects/[slug] without implying live orchestration ownership.
-    - README remains honest that Deploy is still a shell-first control surface.
-    - The web app build passes.
-- id: workflow-run-activity-bridge
-  title: Emit bounded activity records when placeholder workflow runs are created
-  status: pending
-  module: apps/web
-  priority: 20
-  files:
-    - apps/web/app/agents/actions.ts
-    - apps/web/app/agents/page.tsx
-    - apps/web/app/projects/[slug]/page.tsx
-    - apps/web/lib/workflow-store.ts
-    - apps/web/lib/activity-store.ts
-    - .opencode/plans/current-phase.md
-  validation: |
-    pnpm build:web
-  acceptance:
-    - Creating a bounded manual workflow run writes a matching activity record to the activity store.
-    - Project detail and workflow surfaces can render the recorded event without claiming background execution.
-    - The phase stays single-user and shell-first.
-    - The web app build passes.
+  - id: project-host-picker-shell-source
+    title: Add a bounded host picker to the new project flow using stored host heartbeat records
+    status: pending
+    module: apps/web
+    priority: 24
+    files:
+      - apps/web/app/projects/new/page.tsx
+      - apps/web/app/api/hosts/list/route.ts
+      - apps/web/app/projects/actions.ts
+      - apps/web/lib/host-store.ts
+      - apps/web/lib/project-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - The new project flow can fetch and present a bounded list of stored hosts for single-user selection.
+      - The selected host identifier is saved onto the placeholder project record.
+      - The phase does not add SSH execution, agent installation, or multi-host orchestration yet.
+      - The web app build passes.
+  - id: deploy-project-link-shell
+    title: Add bounded project linkage from Deploy cards into the project detail shell
+    status: pending
+    module: apps/web
+    priority: 22
+    files:
+      - apps/web/app/deploy/page.tsx
+      - apps/web/app/deploy/types.ts
+      - apps/web/app/deploy/presentation.tsx
+      - apps/web/lib/deploy-adapter.ts
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - Deploy cards can show bounded project identity when available from the adapter seam.
+      - A deploy surface can link into /projects/[slug] without implying live orchestration ownership.
+      - README remains honest that Deploy is still a shell-first control surface.
+      - The web app build passes.
+  - id: workflow-run-activity-bridge
+    title: Emit bounded activity records when placeholder workflow runs are created
+    status: pending
+    module: apps/web
+    priority: 20
+    files:
+      - apps/web/app/agents/actions.ts
+      - apps/web/app/agents/page.tsx
+      - apps/web/app/projects/[slug]/page.tsx
+      - apps/web/lib/workflow-store.ts
+      - apps/web/lib/activity-store.ts
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm build:web
+    acceptance:
+      - Creating a bounded manual workflow run writes a matching activity record to the activity store.
+      - Project detail and workflow surfaces can render the recorded event without claiming background execution.
+      - The phase stays single-user and shell-first.
+      - The web app build passes.

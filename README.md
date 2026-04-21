@@ -44,6 +44,7 @@ The `screens/` directory contains design-reference exports from the earlier mock
 Confirmed runtime routes in `apps/web`:
 
 - `/` — Hub shell with mobile-first status cards, quick actions, workflow summary, and recent activity
+- `/login` — bounded single-user GitHub login page with clear success and failure states for shell session presence
 - `/projects` — Projects list shell with stacked status cards and a create-project CTA
 - `/projects/[slug]` — project detail overview shell with repository, host, workflow, deployment, and activity summaries
 - `/projects/new` — guided project-creation placeholder flow
@@ -56,22 +57,29 @@ Confirmed thin API routes in `apps/web/app/api`:
 - `GET /api/health` — lightweight health payload for the web shell
 - `GET /api/deploy/status` — simulated deployment status payload used by `/deploy`
 - `POST /api/deploy/actions` — request validation and simulated deploy-action acceptance/rejection without real Docker control
+- `GET /api/github/repos` — bounded GitHub repository list payload for the authenticated project-creation flow
+
+Confirmed auth flow routes in `apps/web/app/auth`:
+
+- `GET /auth/github` — initiates a bounded GitHub OAuth flow for the single-user shell session
+- `GET /auth/github/callback` — completes the GitHub OAuth callback, establishes signed shell session presence, and returns to `/login`
 
 ## Not implemented yet
 
 Placeholder UI flows that currently ship as shell-only routes:
 
-- `/projects/new` does not browse GitHub, pair a real host, or persist a created project
+- `/projects/new` can load a bounded live GitHub repository list for a signed-in user and save that selection into the placeholder project record, but it still does not browse file trees or pair a real host
 - `/projects/[slug]` does not browse repository files, stream runtime logs, or execute live workflow/deploy controls
 - `/agents/new` does not save workflows, edit reusable steps, schedule runs, or execute agents
 - `/deploy` uses a bounded adapter seam with simulated data and accepted action requests rather than live host or Docker control
+- `/login` can establish single-user GitHub session presence when OAuth environment variables are configured, but broader GitHub sync and control remain out of scope
 
 Future integrations and backend work that are still absent from the runtime:
 
-- authentication, user accounts, and access control
-- real GitHub linking, repo discovery, and webhook-backed workflow activity
+- multi-user auth, broader user-account management, and access control
+- live GitHub file browsing, deeper metadata sync, and webhook-backed workflow activity beyond the bounded login and repo-picker shell
 - real host pairing, SSH transport, and host heartbeat/storage
-- persistence for projects, workflows, deployment state, or saved drafts
+- broad persistence beyond the bounded placeholder project store, including workflows, deployment state, and saved drafts
 - background execution, streaming logs, and production-grade orchestration
 
 The current runtime should be read as an honest mobile-first product shell, not a fully integrated control plane.
@@ -82,6 +90,19 @@ The current runtime should be read as an honest mobile-first product shell, not 
 pnpm install
 pnpm dev:web
 ```
+
+## Optional GitHub OAuth setup
+
+To enable the bounded GitHub login flow, configure these environment variables before running the web app:
+
+```bash
+GITHUB_CLIENT_ID=your_github_oauth_app_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_app_client_secret
+```
+
+The default OAuth request now supports the bounded repo picker by asking GitHub for user identity plus repository access needed to list selectable repos for the single-user shell.
+
+Without these variables, `/login` still renders and the shell explains that GitHub auth is unavailable instead of claiming a live session.
 
 ## Security operator note
 

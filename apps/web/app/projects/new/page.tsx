@@ -1,5 +1,7 @@
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
+import { getGitHubRepoPickerState } from '../../../lib/github';
 import { createPlaceholderProjectAction } from '../actions';
 
 const steps = [
@@ -85,9 +87,11 @@ type NewProjectPageProps = {
 
 export default async function NewProjectPage({ searchParams }: NewProjectPageProps) {
   const params = searchParams ? await searchParams : undefined;
+  const repoPickerState = await getGitHubRepoPickerState(await cookies());
+  const liveRepos = repoPickerState.kind === 'ready' ? repoPickerState.repos : [];
   const selectedHostId = params?.host === 'edge-host' ? 'edge-host' : 'home-server';
   const initialName = params?.name?.trim() || 'Acme service desk';
-  const initialRepo = params?.repo?.trim() || 'acme/service-desk';
+  const initialRepo = params?.repo?.trim() || liveRepos[0]?.fullName || 'acme/service-desk';
   const showError = params?.error === 'missing-fields';
 
   return (
@@ -140,7 +144,9 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
         <section className="card flowCard">
           <div className="cardTitle">
             <h2>Step 1 · Name + repo</h2>
-            <span className="badge badgeBlue">Required</span>
+            <span className={`badge ${repoPickerState.kind === 'ready' ? 'badgeGreen' : 'badgeBlue'}`}>
+              {repoPickerState.kind === 'ready' ? 'GitHub live list' : 'Required'}
+            </span>
           </div>
 
           <div className="inputStack">
@@ -148,15 +154,58 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
               <div className="fieldLabel">Project name</div>
               <input className="fieldInput" defaultValue={initialName} id="project-name" name="name" required type="text" />
             </label>
-            <label className="fieldShell fieldShellInteractive" htmlFor="project-repo">
-              <div className="fieldLabel">GitHub repository</div>
-              <input className="fieldInput" defaultValue={initialRepo} id="project-repo" name="repo" required type="text" />
-            </label>
+
+            {repoPickerState.kind === 'ready' ? (
+              <>
+                <input name="repoSource" type="hidden" value="github-picker" />
+                <div className="fieldLabel">GitHub repository</div>
+                <div className="selectionStack" aria-label="GitHub repositories">
+                  {liveRepos.map((repo) => {
+                    const isSelected = initialRepo === repo.fullName;
+
+                    return (
+                      <label className={`selectionCard selectionChoice${isSelected ? ' selectionCardActive' : ''}`} key={repo.id}>
+                        <input
+                          className="selectionInput"
+                          defaultChecked={isSelected}
+                          name="repo"
+                          type="radio"
+                          value={repo.fullName}
+                        />
+                        <div className="selectionBody">
+                          <div className="selectionTitle">{repo.fullName}</div>
+                          <p className="subtle selectionCopy">
+                            {repo.visibilityLabel} · {repo.defaultBranch} · {repo.updatedLabel}
+                          </p>
+                        </div>
+                        <span className="badge badgeBlue">Select</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>
+                <input name="repoSource" type="hidden" value="manual" />
+                <label className="fieldShell fieldShellInteractive" htmlFor="project-repo">
+                  <div className="fieldLabel">GitHub repository</div>
+                  <input className="fieldInput" defaultValue={initialRepo} id="project-repo" name="repo" required type="text" />
+                </label>
+              </>
+            )}
           </div>
 
           <p className="subtle flowHint">
-            Live repo browsing is not wired yet, so this phase saves the repository identifier you enter as bounded placeholder metadata.
+            {repoPickerState.message} File trees, webhook sync, and broader metadata ingestion remain out of scope in this phase.
           </p>
+
+          {repoPickerState.kind !== 'ready' ? (
+            <div className="flowActions">
+              <Link className="secondaryCta ctaLink" href="/login">
+                Connect GitHub
+              </Link>
+            </div>
+          ) : null}
         </section>
 
         <section className="card flowCard">
@@ -224,7 +273,7 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
           </div>
           <p className="subtle flowHint">
             This guided flow now saves a bounded placeholder project record for the single-user shell.
-            Live repo lookup, host-backed creation, and service auto-detection stay out of scope for now.
+            Live repo lookup is now limited to a bounded GitHub picker, while host-backed creation and service auto-detection stay out of scope for now.
           </p>
           <div className="flowActions">
             <Link className="secondaryCta ctaLink" href="/projects">

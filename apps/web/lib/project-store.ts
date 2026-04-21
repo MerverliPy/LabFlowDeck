@@ -4,6 +4,7 @@ interface CreatePlaceholderProjectInput {
   name: string;
   repo: string;
   hostPreset: 'home-server' | 'edge-host';
+  repoSource: 'github-picker' | 'manual';
 }
 
 const HOST_PRESETS = {
@@ -432,6 +433,7 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
   const slug = getUniqueSlug(name, projects);
   const repo = normalizeRepoIdentifier(input.repo) || `placeholder/${slug}`;
   const host = HOST_PRESETS[input.hostPreset] ?? HOST_PRESETS['home-server'];
+  const repoSource = input.repoSource === 'github-picker' ? 'github-picker' : 'manual';
   const savedTimeLabel = 'Saved just now';
 
   return {
@@ -439,7 +441,10 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
     name,
     repo,
     branch: 'main',
-    summary: `Placeholder project shell for ${repo} created from the guided setup flow so the operator can continue with workflow and deploy planning later.`,
+    summary:
+      repoSource === 'github-picker'
+        ? `Placeholder project shell for ${repo} created from the connected GitHub repository picker so the operator can continue with host and workflow planning later.`
+        : `Placeholder project shell for ${repo} created from the guided setup flow so the operator can continue with workflow and deploy planning later.`,
     host: {
       label: host.label,
       state: host.state,
@@ -468,8 +473,8 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
       updated: savedTimeLabel,
     },
     repository: {
-      provider: 'GitHub · placeholder repo captured',
-      lastCommit: 'Placeholder project record saved',
+      provider: repoSource === 'github-picker' ? 'GitHub · repo selected from live list' : 'GitHub · placeholder repo captured',
+      lastCommit: repoSource === 'github-picker' ? 'Repository selected from connected GitHub session' : 'Placeholder project record saved',
       lastCommitAge: savedTimeLabel,
       trackedPaths: 'Live repository browsing not wired yet',
     },
@@ -500,7 +505,10 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
           source: 'project',
           severity: 'info',
           time: savedTimeLabel,
-          detail: 'The guided create flow saved a bounded project record for the single-user shell.',
+          detail:
+            repoSource === 'github-picker'
+              ? 'The guided create flow saved a bounded project record using a repository chosen from the connected GitHub session.'
+              : 'The guided create flow saved a bounded project record for the single-user shell.',
           badge: 'badgeBlue' as const,
         },
         {
@@ -528,12 +536,15 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
         time: savedTimeLabel,
         badge: 'badgeBlue' as const,
       },
-      {
-        title: 'Repository captured',
-        detail: `${repo} is now linked to the Projects shell as placeholder metadata.`,
-        time: savedTimeLabel,
-        badge: 'badgeBlue' as const,
-      },
+        {
+          title: 'Repository captured',
+          detail:
+            repoSource === 'github-picker'
+              ? `${repo} is now linked from the bounded live GitHub picker without enabling file browsing or sync.`
+              : `${repo} is now linked to the Projects shell as placeholder metadata.`,
+          time: savedTimeLabel,
+          badge: 'badgeBlue' as const,
+        },
       {
         title: 'Host selected',
         detail: `${host.label} remains the chosen runtime context until live host-backed creation is added.`,
