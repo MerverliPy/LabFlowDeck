@@ -18,7 +18,7 @@ describe('getGitHubRepoPickerState', () => {
   });
 
   it('returns reauth-required when session exists but access token does not', async () => {
-    vi.stubEnv('GITHUB_CLIENT_SECRET', 'top-secret');
+    vi.stubEnv('LABFLOWDECK_SESSION_SECRET', 'top-secret');
 
     const { createSignedGitHubSessionValue } = await import('./github-auth');
     const signedSession = createSignedGitHubSessionValue({

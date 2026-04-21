@@ -35,7 +35,7 @@ const STATE_COOKIE_MAX_AGE_SECONDS = 60 * 10;
 const SESSION_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 12;
 
 function getSessionSecret() {
-  return process.env.LABFLOWDECK_SESSION_SECRET?.trim() || process.env.GITHUB_CLIENT_SECRET?.trim() || null;
+  return process.env.LABFLOWDECK_SESSION_SECRET?.trim() || null;
 }
 
 function isSecureRequest(request: NextRequest) {

@@ -4,7 +4,39 @@ set -euo pipefail
 # Uses the provider currently selected in opencode.json.
 # Switch manually with: pnpm workflow:provider -- openai|copilot
 
-opencode run \
+resolve_opencode_bin() {
+  if [[ -n "${OPENCODE_BIN:-}" ]]; then
+    printf '%s\n' "$OPENCODE_BIN"
+    return 0
+  fi
+
+  if command -v opencode >/dev/null 2>&1; then
+    command -v opencode
+    return 0
+  fi
+
+  if [[ -x "./node_modules/.bin/opencode" ]]; then
+    printf '%s\n' "./node_modules/.bin/opencode"
+    return 0
+  fi
+
+  return 1
+}
+
+if ! OPENCODE_BIN="$(resolve_opencode_bin)"; then
+  cat >&2 <<'MSG'
+ERROR: OpenCode CLI is not available.
+Tried:
+- OPENCODE_BIN override
+- global `opencode`
+- local `./node_modules/.bin/opencode`
+
+Install or expose the CLI, then rerun this script.
+MSG
+  exit 127
+fi
+
+exec "$OPENCODE_BIN" run \
   --agent orchestrator \
   "Audit this repository's workflow implementation only.
 
