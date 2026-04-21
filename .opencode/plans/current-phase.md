@@ -5,7 +5,7 @@ Candidate ID: workflow-run-activity-bridge
 ## Goal
 Emit bounded activity records when a manual placeholder workflow run is recorded, and keep the workflow/project-detail shell coherent under the existing single-user, shell-first runtime boundaries.
 
-## Why this phase was next
+## Why this phase is next
 GitHub evidence showed the latest `Web CI` run on `main` failed immediately after the recent workflow/project-shell integration commit, with the break centered on `apps/web/app/projects/[slug]/page.test.tsx`. The two higher-priority pending backlog entries were already implemented in the repo, so the safest bounded follow-up was to bridge recorded workflow runs into the activity store and tighten the workflow/project-detail rendering seam.
 
 ## Selection evidence
