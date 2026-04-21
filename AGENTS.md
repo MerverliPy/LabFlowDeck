@@ -18,6 +18,14 @@ Read these in order when planning or implementing work:
 - Prefer single-module, bounded phases over broad multi-surface expansion.
 - Respect the backlog constraints, especially bounded file count and clear validation.
 
+## README update gate
+At the end of every phase, make an explicit README decision:
+
+- `README_REQUIRED` if the phase changes shipped routes, visible shell behavior, auth/session behavior, persistence status, host/deploy/workflow capabilities, setup or operator guidance, or any claim about what is implemented versus placeholder-only.
+- `README_NOT_NEEDED` only if the phase is internal-only and does not change runtime truth, user-visible behavior, setup guidance, or implementation claims.
+
+If `README_REQUIRED`, update `README.md` in the same phase unless the user explicitly says not to. If `README_NOT_NEEDED`, record a one-line reason in the phase completion summary or validation notes.
+
 ## MCP and tool policy
 When available, prefer tools in this order:
 - Use `github` first for workflow failures, CI state, open pull requests, issues, and recent repo activity.

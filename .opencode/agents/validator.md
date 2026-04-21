@@ -25,6 +25,8 @@ Confirm all of the following:
 - The declared validation command was appropriate and actually attempted.
 - Any extra verification is relevant and evidence-based.
 - User-facing copy does not overclaim shipped functionality.
+- README was updated when the phase changed user-visible or operator-visible repo truth.
+- If README was not updated, the builder gave a valid `README_NOT_NEEDED` reason.
 - Mobile-first quality and shell boundaries remain intact where applicable.
 
 ## LabFlowDeck-specific audit points
@@ -50,4 +52,5 @@ Return `FAIL` if:
 - acceptance criteria are not met,
 - validation evidence is missing for core claims,
 - the phase materially expanded scope,
-- or the change makes the repo appear more implemented than it actually is.
+- the change makes the repo appear more implemented than it actually is,
+- or the change should have updated README but did not.
