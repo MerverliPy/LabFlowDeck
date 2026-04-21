@@ -35,6 +35,21 @@ The workflow is optimized for **high-signal, low-overhead implementation**:
 
 This keeps planning explicit, implementation bounded, and validation auditable.
 
+## Internal workflow provider switch
+
+The repo's internal OpenCode workflow path can be switched manually between OpenAI and GitHub Copilot without hand-editing multiple files:
+
+```bash
+pnpm workflow:provider -- openai
+pnpm workflow:provider -- copilot
+pnpm workflow:provider -- current
+pnpm workflow:provider -- copilot --dry-run
+```
+
+This affects the repo's internal workflow tooling that reads `opencode.json` (for example the OpenCode audit path and promptfoo workflow setup that depends on that config). It does **not** change the shipped `apps/web` product behavior.
+
+Copilot mode currently uses the same verified Copilot model for both `model` and `small_model` slots so the internal workflow stays on one provider until a smaller Copilot-specific fallback is explicitly verified.
+
 ## Design references
 
 The `screens/` directory contains design-reference exports from the earlier mockup workflow. They are useful for visual guidance, but they should not be read as proof that equivalent `apps/web` runtime routes, backend integrations, or completed product flows already ship today.

@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Uses the provider currently selected in opencode.json.
+# Switch manually with: pnpm workflow:provider -- openai|copilot
+
 opencode run \
   --agent orchestrator \
   "Audit this repository's workflow implementation only.

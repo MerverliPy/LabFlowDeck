@@ -1,5 +1,8 @@
 description: LabFlowDeck workflow audit
 
+# Internal workflow provider/model selection comes from opencode.json.
+# Switch it manually with: pnpm workflow:provider -- openai|copilot
+
 prompts:
   - |
       Audit the LabFlowDeck workflow implementation, not the product features.

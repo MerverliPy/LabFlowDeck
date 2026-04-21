@@ -399,6 +399,38 @@ candidates:
       - The phase does not add file-tree browsing, webhook sync, or full repo metadata ingestion yet.
       - The web app build passes.
 
+  - id: internal-workflow-provider-switch
+    title: Add a manual provider switch for the repo's internal OpenCode workflow path
+    status: completed
+    completion_note: Added a single `pnpm workflow:provider` command to switch the internal workflow path between OpenAI and GitHub Copilot, documented the internal-only scope, and preserved the shipped `apps/web` runtime unchanged.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - package.json:5-20
+      - scripts/workflow-provider.mjs:1-86
+      - promptfooconfig.workflow.yaml:1-5
+      - scripts/audit-workflow-opencode.sh:1-6
+      - README.md:38-50
+      - .opencode/plans/current-phase.md:1-79
+    module: .opencode
+    priority: 31
+    files:
+      - opencode.json
+      - package.json
+      - promptfooconfig.workflow.yaml
+      - scripts/audit-workflow-opencode.sh
+      - README.md
+      - .opencode/plans/current-phase.md
+    validation: |
+      pnpm workflow:provider -- openai --dry-run
+      pnpm workflow:provider -- copilot --dry-run
+      pnpm workflow:phase-lint
+    acceptance:
+      - The maintainer can explicitly choose `openai` or `copilot` for the repo's internal workflow path without editing multiple files by hand.
+      - The chosen provider flows through the bounded internal OpenCode or workflow-audit entry path from one manual switch surface.
+      - The phase does not change `apps/web` runtime behavior or imply product-side provider switching.
+      - The validation commands pass.
+
   - id: host-heartbeat-shell-source
     title: Add one bounded host heartbeat source so Hub and project detail stop relying on hard-coded host status text
     status: pending
