@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { appendRecordedWorkflowRunActivity } from '../../lib/activity-store';
 import { getProjectStore } from '../../lib/project-store';
 import { createStoredWorkflow, recordManualWorkflowRun } from '../../lib/workflow-store';
 
@@ -71,6 +72,13 @@ export async function recordManualWorkflowRunAction(formData: FormData) {
   if (!run) {
     redirect('/agents?status=run-unavailable');
   }
+
+  await appendRecordedWorkflowRunActivity({
+    workflowName: run.workflowName,
+    projectName: run.projectName,
+    projectSlug: run.projectSlug,
+    summary: run.summary,
+  });
 
   revalidatePath('/agents');
   revalidatePath('/projects');

@@ -79,14 +79,6 @@ export interface ProjectWorkflowSnapshot {
     value: string;
     badge: WorkflowBadge;
   };
-  logItem: {
-    title: string;
-    source: string;
-    severity: string;
-    time: string;
-    detail: string;
-    badge: WorkflowBadge;
-  } | null;
 }
 
 interface CreateWorkflowInput {
@@ -418,7 +410,6 @@ export async function getProjectWorkflowSnapshot(projectSlug: string): Promise<P
     return null;
   }
 
-  const matchingAssignment = workflow.assignments.find((assignment) => assignment.projectSlug === projectSlug);
   const latestRun = ensureStoredWorkflowRuns().find(
     (run) => run.workflowId === workflow.id && run.projectSlug === projectSlug
   );
@@ -441,22 +432,5 @@ export async function getProjectWorkflowSnapshot(projectSlug: string): Promise<P
       value: latestRun ? formatRunLabel(latestRun) : 'Ready to run',
       badge: latestRun?.badge ?? 'badgeBlue',
     },
-    logItem: latestRun
-      ? {
-          title: `${workflow.name} run recorded`,
-          source: 'workflow',
-          severity: latestRun.state === 'review' ? 'review' : 'info',
-          time: formatRelativeTime(latestRun.createdAt),
-          detail: latestRun.summary,
-          badge: latestRun.badge,
-        }
-      : {
-          title: `${workflow.name} attached`,
-          source: 'workflow',
-          severity: 'info',
-          time: 'Just now',
-          detail: `${matchingAssignment?.projectName ?? 'This project'} is attached to the bounded reusable workflow store and remains manual-first until a placeholder run is recorded.`,
-          badge: 'badgeBlue',
-        },
   };
 }

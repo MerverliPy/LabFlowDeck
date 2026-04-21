@@ -110,13 +110,6 @@ async function applyStoredShellState(project: ProjectOverview) {
 
   const mergedWorkflow = storedWorkflow?.workflow ?? project.workflow;
   const mergedLastRun = storedWorkflow?.lastRun ?? project.lastRun;
-  const mergedLogs = storedWorkflow?.logItem
-    ? {
-        ...project.logs,
-        summary: 'Bounded log summaries now include reusable workflow assignment and manual placeholder run history without streaming raw output.',
-        items: [storedWorkflow.logItem, ...project.logs.items.filter((item) => item.title !== storedWorkflow.logItem?.title)].slice(0, 4),
-      }
-    : project.logs;
 
   return {
     ...project,
@@ -142,7 +135,7 @@ async function applyStoredShellState(project: ProjectOverview) {
     ),
     workflow: mergedWorkflow,
     lastRun: mergedLastRun,
-    logs: mergedLogs,
+    logs: project.logs,
     recentActivity: storedActivity,
   };
 }

@@ -2,6 +2,8 @@ import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import ProjectDetailPage from './page';
+import { appendRecordedWorkflowRunActivity } from '../../../lib/activity-store';
+import { listWorkflowCards, recordManualWorkflowRun } from '../../../lib/workflow-store';
 
 vi.mock('next/navigation', () => ({
   notFound: vi.fn(() => {
@@ -32,12 +34,40 @@ describe('ProjectDetailPage', () => {
 
     expect(screen.getByRole('heading', { name: 'Logs' })).toBeInTheDocument();
     expect(screen.getByText('Validation summary captured')).toBeInTheDocument();
-    expect(screen.getByText('workflow · info')).toBeInTheDocument();
+    expect(within(screen.getByLabelText('Project logs')).getByText('workflow · info')).toBeInTheDocument();
 
     expect(screen.getByRole('heading', { name: 'Stats' })).toBeInTheDocument();
     expect(screen.getByText('4m 18s')).toBeInTheDocument();
     expect(screen.getByText('Recent runtime checks')).toBeInTheDocument();
 
     expect(screen.getByText(/This project detail view is intentionally shell-only/)).toBeInTheDocument();
+  });
+
+  it('renders recorded workflow-run activity in recent activity without duplicating log metadata assertions', async () => {
+    const [firstWorkflow] = await listWorkflowCards();
+    const run = await recordManualWorkflowRun(firstWorkflow.id);
+
+    expect(run).not.toBeNull();
+
+    await appendRecordedWorkflowRunActivity({
+      workflowName: run!.workflowName,
+      projectName: run!.projectName,
+      projectSlug: run!.projectSlug,
+      summary: run!.summary,
+    });
+
+    const view = await ProjectDetailPage({
+      params: Promise.resolve({ slug: run!.projectSlug }),
+    });
+
+    render(view);
+
+    const recentActivity = screen.getByLabelText('Recent activity');
+
+    expect(within(recentActivity).getByText(`${run!.workflowName} run recorded`)).toBeInTheDocument();
+    expect(within(recentActivity).getByText(run!.summary)).toBeInTheDocument();
+    expect(
+      screen.getByText((content) => content.startsWith('Recorded '))
+    ).toBeInTheDocument();
   });
 });

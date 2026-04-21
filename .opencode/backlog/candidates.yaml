@@ -555,7 +555,18 @@ candidates:
 
   - id: workflow-run-activity-bridge
     title: Emit bounded activity records when placeholder workflow runs are created
-    status: pending
+    status: completed
+    completion_note: Recorded manual placeholder workflow runs now emit bounded project activity events, removed duplicate workflow-log injection from project detail composition, and passed the web tests plus build.
+    validation_result: passed
+    completed_at: 2026-04-21T14:31:24Z
+    evidence_refs:
+      - apps/web/app/agents/actions.ts:63-87
+      - apps/web/lib/activity-store.ts:290-301
+      - apps/web/lib/workflow-store.ts:379-435
+      - apps/web/app/projects/data.ts:104-140
+      - apps/web/app/projects/[slug]/page.test.tsx:35-37
+      - apps/web/app/projects/[slug]/page.test.tsx:46-72
+      - .opencode/plans/history/20260421T143124Z--workflow-run-activity-bridge.md:1-95
     module: apps/web
     priority: 20
     files:

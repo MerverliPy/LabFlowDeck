@@ -1,6 +1,6 @@
 type ActivityBadge = 'badgeBlue' | 'badgeGreen' | 'badgeAmber' | 'badgeRed';
 
-type ActivitySource = 'fixture-fallback' | 'project-create' | 'deploy-action';
+type ActivitySource = 'fixture-fallback' | 'project-create' | 'deploy-action' | 'workflow-run';
 
 interface StoredActivityEvent {
   id: string;
@@ -40,6 +40,13 @@ interface DeployActivityInput {
   projectName: string;
   projectSlug: string;
   targetEnvironment?: string;
+}
+
+interface WorkflowRunActivityInput {
+  workflowName: string;
+  projectName: string;
+  projectSlug: string;
+  summary: string;
 }
 
 const MAX_STORED_ACTIVITY_EVENTS = 50;
@@ -276,6 +283,20 @@ export async function appendAcceptedDeployActivity(input: DeployActivityInput) {
       projectName: input.projectName,
       projectSlug: input.projectSlug,
       source: 'deploy-action',
+    }),
+  ]);
+}
+
+export async function appendRecordedWorkflowRunActivity(input: WorkflowRunActivityInput) {
+  return appendStoredEvents([
+    createStoredEvent({
+      title: `${input.workflowName} run recorded`,
+      detail: input.summary,
+      badge: 'badgeBlue',
+      createdAt: new Date().toISOString(),
+      projectName: input.projectName,
+      projectSlug: input.projectSlug,
+      source: 'workflow-run',
     }),
   ]);
 }
