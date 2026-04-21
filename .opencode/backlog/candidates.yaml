@@ -421,7 +421,24 @@ candidates:
 
   - id: activity-feed-live-source
     title: Replace hard-coded recent activity arrays with a bounded stored activity feed for shell events
-    status: pending
+    status: completed
+    completion_note: Added a bounded server-owned activity store with fixture fallback, routed Hub and project detail recent activity through it, and recorded project-create plus accepted deploy-action events without widening into live logs or orchestration.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - apps/web/lib/activity-store.ts:1-281
+      - apps/web/app/page.tsx:4-5
+      - apps/web/app/page.tsx:43-45
+      - apps/web/app/page.tsx:146-160
+      - apps/web/app/projects/data.ts:3-5
+      - apps/web/app/projects/data.ts:103-127
+      - apps/web/app/projects/actions.ts:6-7
+      - apps/web/app/projects/actions.ts:38-50
+      - apps/web/app/api/deploy/actions/route.ts:1-5
+      - apps/web/app/api/deploy/actions/route.ts:71-87
+      - README.md:61-64
+      - README.md:87-90
+      - .opencode/plans/current-phase.md:96-130
     module: apps/web
     priority: 28
     files:

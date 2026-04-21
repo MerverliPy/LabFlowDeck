@@ -58,10 +58,10 @@ The `screens/` directory contains design-reference exports from the earlier mock
 
 Confirmed runtime routes in `apps/web`:
 
-- `/` — Hub shell with mobile-first status cards, quick actions, workflow summary, recent activity, and bounded stored host heartbeat summaries
+- `/` — Hub shell with mobile-first status cards, quick actions, workflow summary, bounded stored activity events, and bounded stored host heartbeat summaries
 - `/login` — bounded single-user GitHub login page with clear success and failure states for shell session presence
 - `/projects` — Projects list shell with stacked status cards and a create-project CTA
-- `/projects/[slug]` — project detail overview shell with repository, host, workflow, deployment, and activity summaries
+- `/projects/[slug]` — project detail overview shell with repository, host, workflow, deployment, and bounded stored activity summaries
 - `/projects/new` — guided project-creation placeholder flow
 - `/agents` — workflow list shell with recent run summaries
 - `/agents/new` — guided workflow-creation placeholder flow
@@ -85,7 +85,7 @@ Confirmed auth flow routes in `apps/web/app/auth`:
 Placeholder UI flows that currently ship as shell-only routes:
 
 - `/projects/new` can load a bounded live GitHub repository list for a signed-in user and save that selection into the placeholder project record, but it still does not browse file trees or pair a real host
-- `/projects/[slug]` can show bounded stored host heartbeat state, but it still does not browse repository files, stream runtime logs, or execute live workflow/deploy controls
+- `/projects/[slug]` can show bounded stored host heartbeat and activity state, but it still does not browse repository files, stream runtime logs, or execute live workflow/deploy controls
 - `/agents/new` does not save workflows, edit reusable steps, schedule runs, or execute agents
 - `/deploy` uses a bounded adapter seam with simulated data and accepted action requests rather than live host or Docker control
 - `/login` can establish single-user GitHub session presence when OAuth environment variables are configured, but broader GitHub sync and control remain out of scope

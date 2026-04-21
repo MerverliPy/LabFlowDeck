@@ -1,5 +1,6 @@
 import { unstable_noStore as noStore } from 'next/cache';
 
+import { listProjectActivityItems } from '../../lib/activity-store';
 import { getHostHeartbeatByLabel } from '../../lib/host-store';
 import { getProjectStore } from '../../lib/project-store';
 
@@ -100,7 +101,10 @@ function markProjectReadsDynamic() {
 }
 
 async function applyStoredHostHeartbeat(project: ProjectOverview) {
-  const storedHost = await getHostHeartbeatByLabel(project.host.label);
+  const [storedHost, storedActivity] = await Promise.all([
+    getHostHeartbeatByLabel(project.host.label),
+    listProjectActivityItems(project.slug),
+  ]);
 
   return {
     ...project,
@@ -119,6 +123,7 @@ async function applyStoredHostHeartbeat(project: ProjectOverview) {
           }
         : metric
     ),
+    recentActivity: storedActivity,
   };
 }
 

@@ -1,3 +1,7 @@
+import { revalidatePath } from 'next/cache';
+
+import { appendAcceptedDeployActivity } from '../../../../lib/activity-store';
+import { getDeployControlAdapter } from '../../../../lib/deploy-adapter';
 import { executeDeployAction } from '../../../deploy/data';
 import {
   DEPLOY_ACTION_TARGET_VALUES,
@@ -5,6 +9,18 @@ import {
   type DeployActionRequest,
   type DeployActionResponse,
 } from '../../../deploy/types';
+
+function resolveProjectSlug(projectId: string, projectName: string) {
+  if (projectId.startsWith('project-')) {
+    return projectId.slice('project-'.length);
+  }
+
+  return projectName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
 
 function isDeployActionRequest(body: unknown): body is DeployActionRequest {
   if (!body || typeof body !== 'object') {
@@ -53,6 +69,24 @@ export async function POST(request: Request) {
   }
 
   const response = await executeDeployAction(body);
+
+  if (response.accepted) {
+    const statusResponse = await getDeployControlAdapter().listStatuses();
+    const deployment = statusResponse.deployments.find((item) => item.id === body.deploymentId);
+
+    if (deployment) {
+      await appendAcceptedDeployActivity({
+        action: body.action,
+        projectName: deployment.projectName,
+        projectSlug: resolveProjectSlug(deployment.projectId, deployment.projectName),
+        targetEnvironment: response.targetEnvironment,
+      });
+
+      revalidatePath('/');
+      revalidatePath(`/projects/${resolveProjectSlug(deployment.projectId, deployment.projectName)}`);
+    }
+  }
+
   const statusCode = response.accepted ? 202 : 400;
 
   return Response.json(response, { status: statusCode });

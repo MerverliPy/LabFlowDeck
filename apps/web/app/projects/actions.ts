@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { appendProjectCreatedActivities } from '../../lib/activity-store';
 import { getProjectStore } from '../../lib/project-store';
 
 function readField(formData: FormData, key: string) {
@@ -35,9 +36,17 @@ export async function createPlaceholderProjectAction(formData: FormData) {
   }
 
   const project = await getProjectStore().createPlaceholderProject({ name, repo, hostPreset, repoSource });
+  await appendProjectCreatedActivities({
+    hostLabel: project.host.label,
+    projectName: project.name,
+    projectSlug: project.slug,
+    repo: project.repo,
+    repoSource,
+  });
 
   revalidatePath('/projects');
   revalidatePath(`/projects/${project.slug}`);
+  revalidatePath('/');
 
   redirect(`/projects/${project.slug}`);
 }

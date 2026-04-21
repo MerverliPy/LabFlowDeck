@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 
+import { listHubActivityItems } from '../lib/activity-store';
 import { getHostHeartbeatResponse } from '../lib/host-store';
 
 const quickActions = [
@@ -33,12 +34,6 @@ const workflows = [
   { name: 'Nightly Repo Inspect', state: 'Needs review', badge: 'badgeAmber' },
 ];
 
-const activity = [
-  { title: 'Host paired successfully', meta: 'home-server · 2m ago', status: 'badgeGreen', label: 'ok' },
-  { title: 'Preview deployment restarted', meta: 'labflowdeck-web · 18m ago', status: 'badgeBlue', label: 'action' },
-  { title: 'Workflow validation warning', meta: 'Build + Validate · 37m ago', status: 'badgeAmber', label: 'warn' },
-];
-
 function markHubDynamic() {
   if (process.env.NODE_ENV !== 'test') {
     noStore();
@@ -47,7 +42,7 @@ function markHubDynamic() {
 
 export default async function HomePage() {
   markHubDynamic();
-  const hostHeartbeat = await getHostHeartbeatResponse();
+  const [hostHeartbeat, activity] = await Promise.all([getHostHeartbeatResponse(), listHubActivityItems()]);
   const hostSummary = hostHeartbeat.summary;
 
   return (
