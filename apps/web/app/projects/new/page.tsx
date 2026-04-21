@@ -1,5 +1,7 @@
 import Link from 'next/link';
 
+import { createPlaceholderProjectAction } from '../actions';
+
 const steps = [
   {
     title: 'Name + repo',
@@ -21,12 +23,14 @@ const steps = [
 
 const hosts = [
   {
+    id: 'home-server',
     name: 'Home server',
     detail: 'Ubuntu · Docker healthy · 3 compose projects',
     badge: 'badgeGreen',
     state: 'Recommended',
   },
   {
+    id: 'edge-host',
     name: 'Edge host',
     detail: 'Remote runner · Last heartbeat 2m ago',
     badge: 'badgeBlue',
@@ -70,7 +74,22 @@ const workflows = [
   },
 ];
 
-export default function NewProjectPage() {
+type NewProjectPageProps = {
+  searchParams?: Promise<{
+    error?: string;
+    name?: string;
+    repo?: string;
+    host?: string;
+  }>;
+};
+
+export default async function NewProjectPage({ searchParams }: NewProjectPageProps) {
+  const params = searchParams ? await searchParams : undefined;
+  const selectedHostId = params?.host === 'edge-host' ? 'edge-host' : 'home-server';
+  const initialName = params?.name?.trim() || 'Acme service desk';
+  const initialRepo = params?.repo?.trim() || 'acme/service-desk';
+  const showError = params?.error === 'missing-fields';
+
   return (
     <main className="shell">
       <section className="header">
@@ -86,7 +105,7 @@ export default function NewProjectPage() {
         </Link>
       </section>
 
-      <div className="grid">
+      <form action={createPlaceholderProjectAction} className="grid">
         <section className="card flowIntroCard">
           <div className="cardTitle">
             <h2>Create project flow</h2>
@@ -106,6 +125,18 @@ export default function NewProjectPage() {
           </div>
         </section>
 
+        {showError ? (
+          <section className="card flowErrorCard">
+            <div className="cardTitle">
+              <h2>Project details missing</h2>
+              <span className="badge badgeAmber">Check step 1</span>
+            </div>
+            <p className="subtle flowHint">
+              Enter both a project name and a GitHub repository before saving a placeholder project shell.
+            </p>
+          </section>
+        ) : null}
+
         <section className="card flowCard">
           <div className="cardTitle">
             <h2>Step 1 · Name + repo</h2>
@@ -113,18 +144,18 @@ export default function NewProjectPage() {
           </div>
 
           <div className="inputStack">
-            <div className="fieldShell">
+            <label className="fieldShell fieldShellInteractive" htmlFor="project-name">
               <div className="fieldLabel">Project name</div>
-              <div className="fieldValue">Acme service desk</div>
-            </div>
-            <div className="fieldShell">
+              <input className="fieldInput" defaultValue={initialName} id="project-name" name="name" required type="text" />
+            </label>
+            <label className="fieldShell fieldShellInteractive" htmlFor="project-repo">
               <div className="fieldLabel">GitHub repository</div>
-              <div className="fieldValue">acme/service-desk</div>
-            </div>
+              <input className="fieldInput" defaultValue={initialRepo} id="project-repo" name="repo" required type="text" />
+            </label>
           </div>
 
           <p className="subtle flowHint">
-            Live repo browsing is not wired yet, so this shell shows the shape of the first create step and where GitHub data will land.
+            Live repo browsing is not wired yet, so this phase saves the repository identifier you enter as bounded placeholder metadata.
           </p>
         </section>
 
@@ -135,14 +166,15 @@ export default function NewProjectPage() {
           </div>
 
           <div className="selectionStack">
-            {hosts.map((host, index) => (
-              <div className={`selectionCard${index === 0 ? ' selectionCardActive' : ''}`} key={host.name}>
+            {hosts.map((host) => (
+              <label className={`selectionCard selectionChoice${selectedHostId === host.id ? ' selectionCardActive' : ''}`} key={host.name}>
+                <input className="selectionInput" defaultChecked={selectedHostId === host.id} name="host" type="radio" value={host.id} />
                 <div className="selectionBody">
                   <div className="selectionTitle">{host.name}</div>
                   <p className="subtle selectionCopy">{host.detail}</p>
                 </div>
                 <span className={`badge ${host.badge}`}>{host.state}</span>
-              </div>
+              </label>
             ))}
           </div>
         </section>
@@ -188,22 +220,22 @@ export default function NewProjectPage() {
         <section className="card flowFooterCard">
           <div className="cardTitle">
             <h2>Ready to continue later</h2>
-            <span className="badge badgeBlue">Placeholder</span>
+            <span className="badge badgeBlue">Save now</span>
           </div>
           <p className="subtle flowHint">
-            Projects now read from a server-owned store, but this guided flow still does not persist new records.
-            Real project saving, repo lookup, and host-backed creation stay out of scope until a later phase.
+            This guided flow now saves a bounded placeholder project record for the single-user shell.
+            Live repo lookup, host-backed creation, and service auto-detection stay out of scope for now.
           </p>
           <div className="flowActions">
             <Link className="secondaryCta ctaLink" href="/projects">
-              Save draft for later
+              Cancel for now
             </Link>
-            <Link className="primaryCta ctaLink" href="/projects">
+            <button className="primaryCta" type="submit">
               Create placeholder project
-            </Link>
+            </button>
           </div>
         </section>
-      </div>
+      </form>
 
       <nav className="bottomNav" aria-label="Primary">
         <Link className="navLink" href="/">

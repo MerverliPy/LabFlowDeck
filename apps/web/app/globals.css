@@ -162,18 +162,34 @@ h1 {
 
 .quickActions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
 .actionButton {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
   border: 1px solid rgba(59,130,246,0.2);
   background: rgba(59,130,246,0.08);
   color: var(--text);
   border-radius: 16px;
-  padding: 14px 10px;
+  padding: 14px 12px;
   text-align: left;
   font: inherit;
+  min-width: 0;
+}
+
+.actionButtonLabel {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.actionButtonHint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .projectSummaryCard {
@@ -408,8 +424,9 @@ h1 {
 .sheetOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(4, 8, 18, 0.72);
-  padding: 16px;
+  background: rgba(4, 8, 18, 0.82);
+  backdrop-filter: blur(10px);
+  padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 18px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -428,16 +445,83 @@ h1 {
 }
 
 .deployServiceSheet {
-  gap: 16px;
+  gap: 0;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  max-height: min(760px, calc(100dvh - 30px - env(safe-area-inset-bottom, 0px)));
+  overflow: hidden;
+}
+
+.sheetHandle {
+  width: 48px;
+  height: 5px;
+  border-radius: 999px;
+  margin: 0 auto 14px;
+  background: rgba(159, 176, 199, 0.36);
+}
+
+.deployServiceSheetTop {
+  display: grid;
+  gap: 12px;
+}
+
+.deployServiceSheetTitleRow {
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .deployServiceSheetHeader {
   display: grid;
   gap: 4px;
+  min-width: 0;
 }
 
 .deployServiceSheetMeta {
   margin: 0;
+}
+
+.deployServiceSheetClose {
+  flex: 0 0 auto;
+}
+
+.deployServiceSheetBadgeGroup {
+  margin-bottom: 2px;
+}
+
+.deployServiceSheetSummary {
+  margin-bottom: 2px;
+}
+
+.deployServiceSheetBody {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 14px 0;
+  padding-right: 4px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(159, 176, 199, 0.28) transparent;
+}
+
+.deployServiceSheetBody::-webkit-scrollbar {
+  width: 8px;
+}
+
+.deployServiceSheetBody::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.deployServiceSheetBody::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(159, 176, 199, 0.28);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.deployServiceSheetBody::-webkit-scrollbar-thumb:hover {
+  background: rgba(159, 176, 199, 0.42);
+  background-clip: padding-box;
 }
 
 .deployServiceDetailSection {
@@ -450,6 +534,51 @@ h1 {
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
+}
+
+.deployServiceSheetFooter {
+  display: grid;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(159, 176, 199, 0.12);
+  background: linear-gradient(180deg, rgba(20, 27, 45, 0), rgba(20, 27, 45, 0.98) 22%);
+}
+
+.deployServiceSheetBackButton {
+  width: 100%;
+}
+
+.deployServiceSheetActionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deployServiceSheetActionButton {
+  min-height: 48px;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .deployProjectHeader,
+  .deployMetaRow,
+  .deployServiceFooter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .deployProjectMeta {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .deployBadgeGroupCompact {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .deployServiceSheetActionGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .agentsRunItem {
@@ -617,7 +746,8 @@ h1 {
 
 .flowIntroCard,
 .flowCard,
-.flowFooterCard {
+.flowFooterCard,
+.flowErrorCard {
   display: grid;
   gap: 14px;
 }
@@ -686,6 +816,38 @@ h1 {
   margin-bottom: 8px;
   font-size: 12px;
   color: var(--muted);
+}
+
+.fieldShellInteractive {
+  display: block;
+}
+
+.fieldInput {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.fieldInput::placeholder {
+  color: var(--muted);
+}
+
+.selectionChoice {
+  position: relative;
+  cursor: pointer;
+}
+
+.selectionInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
 }
 
 .selectionCardActive {

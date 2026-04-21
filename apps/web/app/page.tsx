@@ -1,5 +1,29 @@
 import Link from 'next/link';
 
+const quickActions = [
+  {
+    label: 'Run tests',
+    detail: 'Open the Agents workflow shell to review or trigger the next validation run.',
+    href: '/agents',
+    badge: 'badgeBlue',
+    state: 'Opens Agents',
+  },
+  {
+    label: 'Restart deploy',
+    detail: 'Open the Deploy route for confirmation-gated service actions and recent health status.',
+    href: '/deploy',
+    badge: 'badgeAmber',
+    state: 'Review first',
+  },
+  {
+    label: 'Inspect host',
+    detail: 'Open Projects to inspect the current host and runtime shell summaries for each project.',
+    href: '/projects',
+    badge: 'badgeGreen',
+    state: 'Opens Projects',
+  },
+] as const;
+
 const workflows = [
   { name: 'Build + Validate', state: 'Running', badge: 'badgeBlue' },
   { name: 'Deploy Staging', state: 'Healthy', badge: 'badgeGreen' },
@@ -55,12 +79,18 @@ export default function HomePage() {
         <section className="card">
           <div className="cardTitle">
             <h2>Quick actions</h2>
-            <span className="subtle">Thumb-first</span>
+            <span className="subtle">Honest shortcuts</span>
           </div>
           <div className="quickActions">
-            <button className="actionButton">Run tests</button>
-            <button className="actionButton">Restart deploy</button>
-            <button className="actionButton">Inspect host</button>
+            {quickActions.map((action) => (
+              <Link className="actionButton" href={action.href} key={action.label}>
+                <div>
+                  <div className="actionButtonLabel">{action.label}</div>
+                  <div className="actionButtonHint">{action.detail}</div>
+                </div>
+                <span className={`badge ${action.badge}`}>{action.state}</span>
+              </Link>
+            ))}
           </div>
         </section>
 

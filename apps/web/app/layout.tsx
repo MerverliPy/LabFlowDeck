@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: 'LabFlowDeck',
   description: 'Mobile-first command center for AI-assisted software delivery.',
   applicationName: 'LabFlowDeck',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export const viewport: Viewport = {

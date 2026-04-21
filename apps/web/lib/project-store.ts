@@ -1,5 +1,28 @@
 import type { ProjectOverview } from '../app/projects/data';
 
+interface CreatePlaceholderProjectInput {
+  name: string;
+  repo: string;
+  hostPreset: 'home-server' | 'edge-host';
+}
+
+const HOST_PRESETS = {
+  'home-server': {
+    label: 'Home server',
+    state: 'healthy',
+    badge: 'badgeGreen' as const,
+    detail: 'Ubuntu · Docker healthy · guided setup selected this primary host shell.',
+    heartbeat: 'Selected during guided setup',
+  },
+  'edge-host': {
+    label: 'Edge host',
+    state: 'healthy',
+    badge: 'badgeBlue' as const,
+    detail: 'Remote runner · paired and ready for a first placeholder project shell.',
+    heartbeat: 'Selected during guided setup',
+  },
+};
+
 const FIXTURE_PROJECTS: ProjectOverview[] = [
   {
     slug: 'labflowdeck',
@@ -373,6 +396,168 @@ function cloneProjects(projects: ProjectOverview[]) {
   return structuredClone(projects);
 }
 
+function normalizeRepoIdentifier(repo: string) {
+  return repo.trim().replace(/^https?:\/\/github\.com\//, '').replace(/\.git$/, '');
+}
+
+function slugifyProjectName(name: string) {
+  const slug = name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return slug || 'project-shell';
+}
+
+function getUniqueSlug(name: string, projects: ProjectOverview[]) {
+  const base = slugifyProjectName(name);
+  const existing = new Set(projects.map((project) => project.slug));
+
+  if (!existing.has(base)) {
+    return base;
+  }
+
+  let suffix = 2;
+
+  while (existing.has(`${base}-${suffix}`)) {
+    suffix += 1;
+  }
+
+  return `${base}-${suffix}`;
+}
+
+function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects: ProjectOverview[]) {
+  const name = input.name.trim();
+  const slug = getUniqueSlug(name, projects);
+  const repo = normalizeRepoIdentifier(input.repo) || `placeholder/${slug}`;
+  const host = HOST_PRESETS[input.hostPreset] ?? HOST_PRESETS['home-server'];
+  const savedTimeLabel = 'Saved just now';
+
+  return {
+    slug,
+    name,
+    repo,
+    branch: 'main',
+    summary: `Placeholder project shell for ${repo} created from the guided setup flow so the operator can continue with workflow and deploy planning later.`,
+    host: {
+      label: host.label,
+      state: host.state,
+      badge: host.badge,
+      detail: host.detail,
+      heartbeat: host.heartbeat,
+    },
+    workflow: {
+      label: 'No workflow attached',
+      state: 'optional',
+      badge: 'badgeAmber' as const,
+      detail: 'This placeholder project starts manual-first until a reusable workflow is worth attaching.',
+      cadence: 'Manual only',
+      lastRun: 'Not run yet',
+    },
+    lastRun: {
+      label: 'Last run',
+      value: 'Not run yet',
+      badge: 'badgeAmber' as const,
+    },
+    deploy: {
+      label: 'Deploy',
+      value: 'Ready for first target',
+      badge: 'badgeBlue' as const,
+      target: `${host.label} placeholder target`,
+      updated: savedTimeLabel,
+    },
+    repository: {
+      provider: 'GitHub · placeholder repo captured',
+      lastCommit: 'Placeholder project record saved',
+      lastCommitAge: savedTimeLabel,
+      trackedPaths: 'Live repository browsing not wired yet',
+    },
+    runtime: {
+      state: 'not configured',
+      badge: 'badgeAmber' as const,
+      detail: 'The runtime shell stays in setup mode until a real host-backed runtime or deploy target is attached.',
+      session: 'Awaiting first runtime target',
+      commandProfile: 'Inspect, validate',
+      outputPreview: 'No runtime commands executed yet because this is a bounded placeholder project shell.',
+      actions: [
+        { label: 'Validate setup', state: 'Suggested', badge: 'badgeBlue' as const },
+        { label: 'Inspect repo shell', state: 'Shell only', badge: 'badgeGreen' as const },
+        { label: 'Restart service', state: 'Unavailable', badge: 'badgeAmber' as const },
+      ],
+    },
+    metrics: [
+      { label: 'Services', value: '0 tracked' },
+      { label: 'Workflow', value: 'Optional' },
+      { label: 'Host', value: host.label },
+      { label: 'Next step', value: 'Attach workflow' },
+    ],
+    logs: {
+      summary: 'Placeholder logs capture the guided setup state until live repo, workflow, and deploy integrations arrive.',
+      items: [
+        {
+          title: 'Placeholder project saved',
+          source: 'project',
+          severity: 'info',
+          time: savedTimeLabel,
+          detail: 'The guided create flow saved a bounded project record for the single-user shell.',
+          badge: 'badgeBlue' as const,
+        },
+        {
+          title: 'Host selection captured',
+          source: 'host',
+          severity: 'ok',
+          time: savedTimeLabel,
+          detail: `${host.label} was selected as the first runtime context for this placeholder project.`,
+          badge: host.badge,
+        },
+        {
+          title: 'Workflow still optional',
+          source: 'workflow',
+          severity: 'note',
+          time: savedTimeLabel,
+          detail: 'No workflow is attached yet, so this project remains ready for manual-first setup.',
+          badge: 'badgeAmber' as const,
+        },
+      ],
+    },
+    recentActivity: [
+      {
+        title: 'Placeholder project saved',
+        detail: 'The guided create flow wrote a bounded project shell to the server-owned store.',
+        time: savedTimeLabel,
+        badge: 'badgeBlue' as const,
+      },
+      {
+        title: 'Repository captured',
+        detail: `${repo} is now linked to the Projects shell as placeholder metadata.`,
+        time: savedTimeLabel,
+        badge: 'badgeBlue' as const,
+      },
+      {
+        title: 'Host selected',
+        detail: `${host.label} remains the chosen runtime context until live host-backed creation is added.`,
+        time: savedTimeLabel,
+        badge: host.badge,
+      },
+    ],
+    stats: {
+      summary: 'Starter metrics frame the next setup step without claiming live analytics or deploy history.',
+      highlights: [
+        { label: 'Build time', value: '—' },
+        { label: 'Success rate', value: '—' },
+        { label: 'CPU budget', value: '—' },
+        { label: 'Memory use', value: '—' },
+      ],
+      rows: [
+        { label: 'Saved state', value: savedTimeLabel },
+        { label: 'Tracked runtime checks', value: '0 until first service attach' },
+        { label: 'Next operational step', value: 'Attach workflow + deploy target' },
+      ],
+    },
+  } satisfies ProjectOverview;
+}
+
 function readConfiguredProjects() {
   const raw = process.env.LABFLOWDECK_PROJECTS_JSON?.trim();
 
@@ -393,13 +578,29 @@ function readConfiguredProjects() {
   return cloneProjects(FIXTURE_PROJECTS);
 }
 
+let storedProjects: ProjectOverview[] | null = null;
+
+function ensureStoredProjects() {
+  if (!storedProjects) {
+    storedProjects = readConfiguredProjects();
+  }
+
+  return storedProjects;
+}
+
 class ConfiguredProjectStore {
   async listProjects() {
-    return readConfiguredProjects();
+    return cloneProjects(ensureStoredProjects());
   }
 
   async getProjectBySlug(slug: string) {
-    return readConfiguredProjects().find((project) => project.slug === slug);
+    return cloneProjects(ensureStoredProjects()).find((project) => project.slug === slug);
+  }
+
+  async createPlaceholderProject(input: CreatePlaceholderProjectInput) {
+    const nextProject = buildPlaceholderProject(input, ensureStoredProjects());
+    storedProjects = [nextProject, ...ensureStoredProjects()];
+    return structuredClone(nextProject);
   }
 }
 

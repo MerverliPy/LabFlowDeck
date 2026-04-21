@@ -57,14 +57,14 @@ export default async function ProjectsPage() {
                 <div>
                   <h2>No stored projects yet</h2>
                   <p className="projectRepo">Server-owned project store is empty</p>
-                  <p className="listMeta">Create flow remains guided-only in this phase</p>
+                  <p className="listMeta">Use the guided flow to save a first placeholder project shell</p>
                 </div>
                 <span className="badge badgeAmber">Empty</span>
               </div>
 
               <p className="subtle projectCardCopy">
-                The Projects list now reflects the server-owned read path, so it stays empty until a later phase
-                adds placeholder persistence.
+                The Projects list reflects the server-owned store, so it stays empty until you save a placeholder
+                project from the guided creation flow.
               </p>
 
               <div className="projectBadges">
