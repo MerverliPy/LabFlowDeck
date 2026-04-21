@@ -195,6 +195,11 @@ export function DeployProjectList({ deployments, onClearFilters, onOpenAction, o
               <p className="listMeta">
                 {deployment.hostName} · {deployment.serviceCount} tracked services
               </p>
+              {deployment.projectSlug ? (
+                <Link className="secondaryInlineButton" href={`/projects/${deployment.projectSlug}`}>
+                  Open project shell
+                </Link>
+              ) : null}
             </div>
             <div className="deployBadgeGroup deployBadgeGroupCompact">
               <span className={`badge ${getRuntimeBadge(deployment.runtimeStatus)}`}>runtime {deployment.runtimeStatus}</span>
@@ -362,6 +367,13 @@ export function DeployServiceDetailSheet({ selectedService, onClose, onOpenActio
             <div className="listMeta">
               {getProjectSummary(deployment)} across {deployment.serviceCount} tracked services
             </div>
+            {deployment.projectSlug ? (
+              <div className="flowActions">
+                <Link className="secondaryCta ctaLink" href={`/projects/${deployment.projectSlug}`}>
+                  Open project detail
+                </Link>
+              </div>
+            ) : null}
           </section>
         </div>
 

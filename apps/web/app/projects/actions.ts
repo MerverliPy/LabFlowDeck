@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { appendProjectCreatedActivities } from '../../lib/activity-store';
+import { listHostHeartbeats } from '../../lib/host-store';
 import { getProjectStore } from '../../lib/project-store';
 
 function readField(formData: FormData, key: string) {
@@ -16,8 +17,10 @@ export async function createPlaceholderProjectAction(formData: FormData) {
   const repo = readField(formData, 'repo');
   const repoSourceValue = readField(formData, 'repoSource');
   const hostValue = readField(formData, 'host');
-  const hostPreset = hostValue === 'edge-host' ? 'edge-host' : 'home-server';
   const repoSource = repoSourceValue === 'github-picker' ? 'github-picker' : 'manual';
+  const hosts = await listHostHeartbeats();
+  const selectedHost = hosts.find((host) => host.id === hostValue) ?? null;
+  const fallbackHost = selectedHost ?? hosts[0] ?? null;
 
   if (!name || !repo) {
     const params = new URLSearchParams();
@@ -30,12 +33,25 @@ export async function createPlaceholderProjectAction(formData: FormData) {
       params.set('repo', repo);
     }
 
-    params.set('host', hostPreset);
+    if (fallbackHost) {
+      params.set('host', fallbackHost.id);
+    }
+
     params.set('error', 'missing-fields');
     redirect(`/projects/new?${params.toString()}`);
   }
 
-  const project = await getProjectStore().createPlaceholderProject({ name, repo, hostPreset, repoSource });
+  if (!selectedHost) {
+    const params = new URLSearchParams({ name, repo, error: 'invalid-host' });
+
+    if (fallbackHost) {
+      params.set('host', fallbackHost.id);
+    }
+
+    redirect(`/projects/new?${params.toString()}`);
+  }
+
+  const project = await getProjectStore().createPlaceholderProject({ name, repo, repoSource, host: selectedHost });
   await appendProjectCreatedActivities({
     hostLabel: project.host.label,
     projectName: project.name,

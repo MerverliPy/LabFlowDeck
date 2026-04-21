@@ -458,7 +458,19 @@ candidates:
 
   - id: workflow-save-and-run-history
     title: Let the workflow shell save reusable workflows and record bounded manual run history
-    status: pending
+    status: completed
+    completion_note: Added a bounded reusable workflow store and server actions so Agents can save workflows, record manual placeholder runs, and project detail can reflect workflow assignment plus run summaries without claiming live execution.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - README.md:66-67
+      - README.md:87-90
+      - apps/web/app/agents/new/page.tsx:1-296
+      - apps/web/app/agents/page.tsx:1-179
+      - apps/web/app/agents/actions.ts:1-80
+      - apps/web/app/projects/data.ts:1-164
+      - apps/web/lib/workflow-store.ts:1-462
+      - .opencode/plans/history/20260421T122047Z--workflow-save-and-run-history.md:1-127
     module: apps/web
     priority: 26
     files:
@@ -478,7 +490,23 @@ candidates:
 
   - id: project-host-picker-shell-source
     title: Add a bounded host picker to the new project flow using stored host heartbeat records
-    status: pending
+    status: completed
+    completion_note: Replaced the hard-coded `/projects/new` host presets with bounded stored heartbeat records, added a thin host-list route, and persisted the selected stored host on saved placeholder projects without widening into host pairing or SSH control.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - README.md:76-77
+      - README.md:88-89
+      - apps/web/app/projects/new/page.tsx:4-5
+      - apps/web/app/projects/new/page.tsx:72-91
+      - apps/web/app/projects/new/page.tsx:219-252
+      - apps/web/app/api/hosts/list/route.ts:1-14
+      - apps/web/app/projects/actions.ts:7-8
+      - apps/web/app/projects/actions.ts:15-55
+      - apps/web/lib/project-store.ts:1-8
+      - apps/web/lib/project-store.ts:432-438
+      - .opencode/plans/current-phase.md:1-46
+      - .opencode/plans/history/20260421T125507Z--project-host-picker-shell-source.md:1-53
     module: apps/web
     priority: 24
     files:
@@ -498,7 +526,16 @@ candidates:
 
   - id: deploy-project-link-shell
     title: Add bounded project linkage from Deploy cards into the project detail shell
-    status: pending
+    status: completed
+    completion_note: Added bounded project-detail links to the Deploy shell by normalizing deploy records with project slugs in the adapter seam and surfacing those links from deploy cards and the service detail sheet.
+    validation_result: passed
+    completed_at: 2026-04-21
+    evidence_refs:
+      - apps/web/app/deploy/presentation.tsx
+      - apps/web/app/deploy/types.ts
+      - apps/web/lib/deploy-adapter.ts
+      - README.md
+      - .opencode/plans/current-phase.md
     module: apps/web
     priority: 22
     files:

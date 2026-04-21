@@ -3,6 +3,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { listProjectActivityItems } from '../../lib/activity-store';
 import { getHostHeartbeatByLabel } from '../../lib/host-store';
 import { getProjectStore } from '../../lib/project-store';
+import { getProjectWorkflowSnapshot } from '../../lib/workflow-store';
 
 export type ProjectCardBadge = 'badgeBlue' | 'badgeGreen' | 'badgeAmber' | 'badgeRed';
 
@@ -100,11 +101,22 @@ function markProjectReadsDynamic() {
   }
 }
 
-async function applyStoredHostHeartbeat(project: ProjectOverview) {
-  const [storedHost, storedActivity] = await Promise.all([
+async function applyStoredShellState(project: ProjectOverview) {
+  const [storedHost, storedActivity, storedWorkflow] = await Promise.all([
     getHostHeartbeatByLabel(project.host.label),
     listProjectActivityItems(project.slug),
+    getProjectWorkflowSnapshot(project.slug),
   ]);
+
+  const mergedWorkflow = storedWorkflow?.workflow ?? project.workflow;
+  const mergedLastRun = storedWorkflow?.lastRun ?? project.lastRun;
+  const mergedLogs = storedWorkflow?.logItem
+    ? {
+        ...project.logs,
+        summary: 'Bounded log summaries now include reusable workflow assignment and manual placeholder run history without streaming raw output.',
+        items: [storedWorkflow.logItem, ...project.logs.items.filter((item) => item.title !== storedWorkflow.logItem?.title)].slice(0, 4),
+      }
+    : project.logs;
 
   return {
     ...project,
@@ -121,15 +133,23 @@ async function applyStoredHostHeartbeat(project: ProjectOverview) {
             ...metric,
             value: storedHost.latencyLabel,
           }
+        : metric.label === 'Workflow'
+          ? {
+              ...metric,
+              value: mergedWorkflow.label,
+            }
         : metric
     ),
+    workflow: mergedWorkflow,
+    lastRun: mergedLastRun,
+    logs: mergedLogs,
     recentActivity: storedActivity,
   };
 }
 
 export async function listProjects() {
   markProjectReadsDynamic();
-  return Promise.all((await projectStore.listProjects()).map(applyStoredHostHeartbeat));
+  return Promise.all((await projectStore.listProjects()).map(applyStoredShellState));
 }
 
 export async function getProjectBySlug(slug: string) {
@@ -140,5 +160,5 @@ export async function getProjectBySlug(slug: string) {
     return null;
   }
 
-  return applyStoredHostHeartbeat(project);
+  return applyStoredShellState(project);
 }

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 
 import { getGitHubRepoPickerState } from '../../../lib/github';
+import { listHostHeartbeats } from '../../../lib/host-store';
 import { createPlaceholderProjectAction } from '../actions';
 
 const steps = [
@@ -11,7 +12,7 @@ const steps = [
   },
   {
     title: 'Select host',
-    description: 'Choose the paired machine that should own the runtime and deploy checks.',
+    description: 'Choose the stored host record that should anchor the runtime and deploy shell.',
   },
   {
     title: 'Confirm services',
@@ -20,23 +21,6 @@ const steps = [
   {
     title: 'Attach workflow',
     description: 'Optionally attach an agent workflow now, or leave it for later.',
-  },
-];
-
-const hosts = [
-  {
-    id: 'home-server',
-    name: 'Home server',
-    detail: 'Ubuntu · Docker healthy · 3 compose projects',
-    badge: 'badgeGreen',
-    state: 'Recommended',
-  },
-  {
-    id: 'edge-host',
-    name: 'Edge host',
-    detail: 'Remote runner · Last heartbeat 2m ago',
-    badge: 'badgeBlue',
-    state: 'Available',
   },
 ];
 
@@ -85,14 +69,26 @@ type NewProjectPageProps = {
   }>;
 };
 
+function getHostStateLabel(state: 'healthy' | 'degraded' | 'offline') {
+  switch (state) {
+    case 'healthy':
+      return 'Healthy';
+    case 'degraded':
+      return 'Needs review';
+    case 'offline':
+      return 'Offline';
+  }
+}
+
 export default async function NewProjectPage({ searchParams }: NewProjectPageProps) {
   const params = searchParams ? await searchParams : undefined;
-  const repoPickerState = await getGitHubRepoPickerState(await cookies());
+  const [repoPickerState, hosts] = await Promise.all([getGitHubRepoPickerState(await cookies()), listHostHeartbeats()]);
   const liveRepos = repoPickerState.kind === 'ready' ? repoPickerState.repos : [];
-  const selectedHostId = params?.host === 'edge-host' ? 'edge-host' : 'home-server';
+  const selectedHostId = hosts.some((host) => host.id === params?.host) ? params?.host ?? '' : hosts[0]?.id ?? '';
   const initialName = params?.name?.trim() || 'Acme service desk';
   const initialRepo = params?.repo?.trim() || liveRepos[0]?.fullName || 'acme/service-desk';
-  const showError = params?.error === 'missing-fields';
+  const showMissingFieldsError = params?.error === 'missing-fields';
+  const showInvalidHostError = params?.error === 'invalid-host';
 
   return (
     <main className="shell">
@@ -129,7 +125,7 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
           </div>
         </section>
 
-        {showError ? (
+        {showMissingFieldsError ? (
           <section className="card flowErrorCard">
             <div className="cardTitle">
               <h2>Project details missing</h2>
@@ -137,6 +133,18 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
             </div>
             <p className="subtle flowHint">
               Enter both a project name and a GitHub repository before saving a placeholder project shell.
+            </p>
+          </section>
+        ) : null}
+
+        {showInvalidHostError ? (
+          <section className="card flowErrorCard">
+            <div className="cardTitle">
+              <h2>Host selection needs review</h2>
+              <span className="badge badgeAmber">Check step 2</span>
+            </div>
+            <p className="subtle flowHint">
+              Choose a host from the stored heartbeat list before saving the placeholder project shell.
             </p>
           </section>
         ) : null}
@@ -211,21 +219,37 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
         <section className="card flowCard">
           <div className="cardTitle">
             <h2>Step 2 · Select host</h2>
-            <span className="badge badgeGreen">2 paired</span>
+            <span className={`badge ${hosts.length > 0 ? 'badgeBlue' : 'badgeAmber'}`}>
+              {hosts.length > 0 ? `${hosts.length} stored` : 'No stored hosts'}
+            </span>
           </div>
 
-          <div className="selectionStack">
-            {hosts.map((host) => (
-              <label className={`selectionCard selectionChoice${selectedHostId === host.id ? ' selectionCardActive' : ''}`} key={host.name}>
-                <input className="selectionInput" defaultChecked={selectedHostId === host.id} name="host" type="radio" value={host.id} />
-                <div className="selectionBody">
-                  <div className="selectionTitle">{host.name}</div>
-                  <p className="subtle selectionCopy">{host.detail}</p>
-                </div>
-                <span className={`badge ${host.badge}`}>{host.state}</span>
-              </label>
-            ))}
-          </div>
+          {hosts.length > 0 ? (
+            <>
+              <div className="selectionStack" aria-label="Stored host choices">
+                {hosts.map((host) => (
+                  <label className={`selectionCard selectionChoice${selectedHostId === host.id ? ' selectionCardActive' : ''}`} key={host.id}>
+                    <input className="selectionInput" defaultChecked={selectedHostId === host.id} name="host" type="radio" value={host.id} />
+                    <div className="selectionBody">
+                      <div className="selectionTitle">{host.label}</div>
+                      <p className="subtle selectionCopy">
+                        {host.detail} {host.heartbeat} · {host.latencyLabel}
+                      </p>
+                    </div>
+                    <span className={`badge ${host.badge}`}>{getHostStateLabel(host.state)}</span>
+                  </label>
+                ))}
+              </div>
+
+              <p className="subtle flowHint">
+                Host choices come from bounded stored heartbeat records only. Pairing, SSH setup, and live host control remain out of scope here.
+              </p>
+            </>
+          ) : (
+            <p className="subtle flowHint">
+              No stored host heartbeat records are available yet, so the project shell cannot capture a host selection in this phase.
+            </p>
+          )}
         </section>
 
         <section className="card flowCard">
@@ -273,7 +297,7 @@ export default async function NewProjectPage({ searchParams }: NewProjectPagePro
           </div>
           <p className="subtle flowHint">
             This guided flow now saves a bounded placeholder project record for the single-user shell.
-            Live repo lookup is now limited to a bounded GitHub picker, while host-backed creation and service auto-detection stay out of scope for now.
+            Live repo lookup is now limited to a bounded GitHub picker, while host pairing, host-backed creation, and service auto-detection stay out of scope for now.
           </p>
           <div className="flowActions">
             <Link className="secondaryCta ctaLink" href="/projects">

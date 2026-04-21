@@ -1,72 +1,67 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 
-const workflows = [
-  {
-    name: 'Build + Validate',
-    source: 'Template · Run Tests',
-    schedule: { label: 'Weekdays · 08:30 UTC', badge: 'badgeBlue' },
-    lastRun: { label: 'Passed 12m ago', badge: 'badgeGreen' },
-    projects: ['LabFlowDeck', 'SignalDesk'],
-    usage: '2 projects',
-  },
-  {
-    name: 'Deploy to Staging',
-    source: 'Template · Deploy to Staging',
-    schedule: { label: 'Manual only', badge: 'badgeAmber' },
-    lastRun: { label: 'Ready to run', badge: 'badgeBlue' },
-    projects: ['LabFlowDeck'],
-    usage: '1 project',
-  },
-  {
-    name: 'Nightly Repo Inspect',
-    source: 'Template · Inspect Repository',
-    schedule: { label: 'Nightly · 01:15 UTC', badge: 'badgeBlue' },
-    lastRun: { label: 'Needs review 48m ago', badge: 'badgeAmber' },
-    projects: ['PromptShield', 'SignalDesk'],
-    usage: '2 projects',
-  },
-];
+import { recordManualWorkflowRunAction } from './actions';
+import { listWorkflowCards, listWorkflowRunHistory } from '../../lib/workflow-store';
 
-const recentRuns = [
-  {
-    workflow: 'Build + Validate',
-    project: 'LabFlowDeck',
-    finished: '12m ago',
-    duration: '4m 18s',
+const noticeContent = {
+  saved: {
+    title: 'Workflow saved',
+    detail: 'The shell saved a bounded reusable workflow record and refreshed the Agents and Projects surfaces without claiming live execution.',
     badge: 'badgeGreen',
-    state: 'passed',
   },
-  {
-    workflow: 'Nightly Repo Inspect',
-    project: 'PromptShield',
-    finished: '48m ago',
-    duration: '6m 02s',
-    badge: 'badgeAmber',
-    state: 'review',
-  },
-  {
-    workflow: 'Deploy to Staging',
-    project: 'LabFlowDeck',
-    finished: 'Yesterday',
-    duration: '3m 11s',
+  'run-recorded': {
+    title: 'Manual placeholder run recorded',
+    detail: 'A bounded manual run-history entry was stored for the workflow and its linked project without starting background work.',
     badge: 'badgeBlue',
-    state: 'manual',
   },
-];
+  'run-unavailable': {
+    title: 'Workflow run could not be recorded',
+    detail: 'The selected workflow was missing or had no linked project, so the shell stayed unchanged.',
+    badge: 'badgeAmber',
+  },
+} as const;
 
-export default function AgentsPage() {
+type AgentsPageProps = {
+  searchParams?: Promise<{
+    status?: keyof typeof noticeContent;
+  }>;
+};
+
+export default async function AgentsPage({ searchParams }: AgentsPageProps) {
+  if (process.env.NODE_ENV !== 'test') {
+    noStore();
+  }
+
+  const params = searchParams ? await searchParams : undefined;
+  const workflows = await listWorkflowCards();
+  const recentRuns = await listWorkflowRunHistory();
+  const scheduledCount = workflows.filter((workflow) => workflow.schedule.label !== 'Manual only').length;
+  const reviewCount = recentRuns.filter((run) => run.badge === 'badgeAmber' || run.badge === 'badgeRed').length;
+  const notice = params?.status ? noticeContent[params.status] : null;
+
   return (
     <main className="shell">
       <section className="header">
         <div>
           <div className="eyebrow">LabFlowDeck</div>
           <h1>Agents</h1>
-          <p className="subtle">Workflow templates, run history, and execution controls.</p>
+          <p className="subtle">Reusable workflow shells, bounded run history, and manual-first execution controls.</p>
         </div>
         <div className="badge badgeBlue">{workflows.length} workflows</div>
       </section>
 
       <div className="grid">
+        {notice ? (
+          <section className="card">
+            <div className="cardTitle">
+              <h2>{notice.title}</h2>
+              <span className={`badge ${notice.badge}`}>Updated</span>
+            </div>
+            <p className="subtle">{notice.detail}</p>
+          </section>
+        ) : null}
+
         <section className="card projectSummaryCard">
           <div className="cardTitle">
             <h2>Workflow control plane</h2>
@@ -75,11 +70,11 @@ export default function AgentsPage() {
           <div className="metricRow">
             <div className="metric">
               <div className="metricLabel">Scheduled</div>
-              <div className="metricValue">2 active</div>
+              <div className="metricValue">{scheduledCount} active</div>
             </div>
             <div className="metric">
               <div className="metricLabel">Recent health</div>
-              <div className="metricValue">1 needs review</div>
+              <div className="metricValue">{reviewCount} needs review</div>
             </div>
           </div>
         </section>
@@ -91,15 +86,17 @@ export default function AgentsPage() {
               <span className="badge badgeBlue">Next step</span>
             </div>
             <p className="subtle createProjectCopy">
-              Start from a tested template, keep manual runs available, and attach the workflow to projects later.
+              Start from a tested template, keep manual runs available, and attach the workflow to stored projects.
             </p>
           </div>
-          <Link className="primaryCta ctaLink" href="/agents/new">Create workflow</Link>
+          <Link className="primaryCta ctaLink" href="/agents/new">
+            Create workflow
+          </Link>
         </section>
 
         <section className="agentsStack" aria-label="Workflow list">
           {workflows.map((workflow) => (
-            <article className="card workflowCard" key={workflow.name}>
+            <article className="card workflowCard" key={workflow.id}>
               <div className="workflowCardHeader">
                 <div>
                   <h2>{workflow.name}</h2>
@@ -131,6 +128,13 @@ export default function AgentsPage() {
                 <span className={`badge ${workflow.schedule.badge}`}>schedule</span>
                 <span className={`badge ${workflow.lastRun.badge}`}>last run</span>
               </div>
+
+              <form action={recordManualWorkflowRunAction}>
+                <input name="workflowId" type="hidden" value={workflow.id} />
+                <button className="secondaryCta" type="submit">
+                  Record manual run
+                </button>
+              </form>
             </article>
           ))}
         </section>
@@ -142,7 +146,7 @@ export default function AgentsPage() {
           </div>
           <div className="list">
             {recentRuns.map((run) => (
-              <div className="listItem agentsRunItem" key={`${run.workflow}-${run.project}`}>
+              <div className="listItem agentsRunItem" key={`${run.workflow}-${run.project}-${run.finished}`}>
                 <div>
                   <strong>{run.workflow}</strong>
                   <div className="listMeta">
@@ -157,10 +161,18 @@ export default function AgentsPage() {
       </div>
 
       <nav className="bottomNav" aria-label="Primary">
-        <Link className="navLink" href="/">Hub</Link>
-        <Link className="navLink" href="/projects">Projects</Link>
-        <Link className="navLink navLinkActive" href="/agents">Agents</Link>
-        <Link className="navLink" href="/deploy">Deploy</Link>
+        <Link className="navLink" href="/">
+          Hub
+        </Link>
+        <Link className="navLink" href="/projects">
+          Projects
+        </Link>
+        <Link className="navLink navLinkActive" href="/agents">
+          Agents
+        </Link>
+        <Link className="navLink" href="/deploy">
+          Deploy
+        </Link>
       </nav>
     </main>
   );

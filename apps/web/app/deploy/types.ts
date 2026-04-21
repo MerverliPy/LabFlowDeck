@@ -52,6 +52,7 @@ export interface DeploymentStatus {
   id: string;
   projectId: string;
   projectName: string;
+  projectSlug?: string;
   repo: string;
   hostName: string;
   hostStatus: HostStatus;

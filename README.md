@@ -63,9 +63,9 @@ Confirmed runtime routes in `apps/web`:
 - `/projects` — Projects list shell with stacked status cards and a create-project CTA
 - `/projects/[slug]` — project detail overview shell with repository, host, workflow, deployment, and bounded stored activity summaries
 - `/projects/new` — guided project-creation placeholder flow
-- `/agents` — workflow list shell with recent run summaries
-- `/agents/new` — guided workflow-creation placeholder flow
-- `/deploy` — deploy control-plane shell backed by typed mock data, URL-persisted filters, refresh, and confirmation-driven simulated actions
+- `/agents` — workflow list shell backed by a bounded reusable workflow store plus manual placeholder run-history recording
+- `/agents/new` — guided workflow-creation flow that saves bounded reusable workflow records for the single-user shell
+- `/deploy` — deploy control-plane shell backed by a bounded adapter seam, URL-persisted filters, refresh, confirmation-driven actions, and project-detail links when deployment records can be matched to stored project shells
 
 Confirmed thin API routes in `apps/web/app/api`:
 
@@ -74,6 +74,7 @@ Confirmed thin API routes in `apps/web/app/api`:
 - `POST /api/deploy/actions` — request validation and simulated deploy-action acceptance/rejection without real Docker control
 - `GET /api/github/repos` — bounded GitHub repository list payload for the authenticated project-creation flow
 - `GET /api/hosts/heartbeat` — bounded stored host heartbeat payload used for honest Hub and project host-status summaries
+- `GET /api/hosts/list` — bounded stored host list payload used by the project-creation host picker shell
 
 Confirmed auth flow routes in `apps/web/app/auth`:
 
@@ -84,10 +85,10 @@ Confirmed auth flow routes in `apps/web/app/auth`:
 
 Placeholder UI flows that currently ship as shell-only routes:
 
-- `/projects/new` can load a bounded live GitHub repository list for a signed-in user and save that selection into the placeholder project record, but it still does not browse file trees or pair a real host
+- `/projects/new` can load a bounded live GitHub repository list for a signed-in user, present stored host heartbeat choices, and save those selections into the placeholder project record, but it still does not browse file trees or pair a real host
 - `/projects/[slug]` can show bounded stored host heartbeat and activity state, but it still does not browse repository files, stream runtime logs, or execute live workflow/deploy controls
-- `/agents/new` does not save workflows, edit reusable steps, schedule runs, or execute agents
-- `/deploy` uses a bounded adapter seam with simulated data and accepted action requests rather than live host or Docker control
+- `/agents` and `/agents/new` can save bounded reusable workflow records and record manual placeholder run history, but they still do not edit reusable steps, run background jobs, or execute live agents
+- `/deploy` uses a bounded adapter seam with accepted action requests and project-shell links, rather than live host or Docker control
 - `/login` can establish single-user GitHub session presence when OAuth environment variables are configured, but broader GitHub sync and control remain out of scope
 
 Future integrations and backend work that are still absent from the runtime:

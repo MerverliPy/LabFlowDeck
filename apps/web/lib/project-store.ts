@@ -1,28 +1,12 @@
 import type { ProjectOverview } from '../app/projects/data';
+import type { StoredHostHeartbeat } from './host-store';
 
 interface CreatePlaceholderProjectInput {
   name: string;
   repo: string;
-  hostPreset: 'home-server' | 'edge-host';
+  host: StoredHostHeartbeat;
   repoSource: 'github-picker' | 'manual';
 }
-
-const HOST_PRESETS = {
-  'home-server': {
-    label: 'Home server',
-    state: 'healthy',
-    badge: 'badgeGreen' as const,
-    detail: 'Ubuntu · Docker healthy · guided setup selected this primary host shell.',
-    heartbeat: 'Selected during guided setup',
-  },
-  'edge-host': {
-    label: 'Edge host',
-    state: 'healthy',
-    badge: 'badgeBlue' as const,
-    detail: 'Remote runner · paired and ready for a first placeholder project shell.',
-    heartbeat: 'Selected during guided setup',
-  },
-};
 
 const FIXTURE_PROJECTS: ProjectOverview[] = [
   {
@@ -432,7 +416,7 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
   const name = input.name.trim();
   const slug = getUniqueSlug(name, projects);
   const repo = normalizeRepoIdentifier(input.repo) || `placeholder/${slug}`;
-  const host = HOST_PRESETS[input.hostPreset] ?? HOST_PRESETS['home-server'];
+  const host = input.host;
   const repoSource = input.repoSource === 'github-picker' ? 'github-picker' : 'manual';
   const savedTimeLabel = 'Saved just now';
 
@@ -450,7 +434,7 @@ function buildPlaceholderProject(input: CreatePlaceholderProjectInput, projects:
       state: host.state,
       badge: host.badge,
       detail: host.detail,
-      heartbeat: host.heartbeat,
+      heartbeat: `${host.heartbeat} · ${host.latencyLabel}`,
     },
     workflow: {
       label: 'No workflow attached',

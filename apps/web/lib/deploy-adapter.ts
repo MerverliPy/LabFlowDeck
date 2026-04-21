@@ -16,6 +16,7 @@ const FIXTURE_DEPLOYMENTS: DeploymentStatus[] = [
     id: 'dep-labflowdeck',
     projectId: 'project-labflowdeck',
     projectName: 'LabFlowDeck',
+    projectSlug: 'labflowdeck',
     repo: 'calvin/labflowdeck',
     hostName: 'Home server',
     hostStatus: 'online',
@@ -63,6 +64,7 @@ const FIXTURE_DEPLOYMENTS: DeploymentStatus[] = [
     id: 'dep-promptshield',
     projectId: 'project-promptshield',
     projectName: 'PromptShield',
+    projectSlug: 'promptshield',
     repo: 'calvin/promptshield',
     hostName: 'Edge host',
     hostStatus: 'degraded',
@@ -98,6 +100,7 @@ const FIXTURE_DEPLOYMENTS: DeploymentStatus[] = [
     id: 'dep-signaldesk',
     projectId: 'project-signaldesk',
     projectName: 'SignalDesk',
+    projectSlug: 'signaldesk',
     repo: 'calvin/signaldesk',
     hostName: 'Build host',
     hostStatus: 'online',
@@ -136,6 +139,25 @@ function cloneDeployments(deployments: DeploymentStatus[]) {
   return structuredClone(deployments);
 }
 
+function deriveProjectSlug(projectId: string, projectName: string) {
+  if (projectId.startsWith('project-')) {
+    return projectId.slice('project-'.length);
+  }
+
+  return projectName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+function normalizeDeployment(deployment: DeploymentStatus): DeploymentStatus {
+  return {
+    ...deployment,
+    projectSlug: deployment.projectSlug?.trim() || deriveProjectSlug(deployment.projectId, deployment.projectName),
+  };
+}
+
 function getTargetEnvironment() {
   return process.env.LABFLOWDECK_DEPLOY_ENVIRONMENT?.trim() || DEFAULT_TARGET_ENVIRONMENT;
 }
@@ -145,7 +167,7 @@ function readConfiguredDeployments(): { deployments: DeploymentStatus[]; adapter
 
   if (!raw) {
     return {
-      deployments: cloneDeployments(FIXTURE_DEPLOYMENTS),
+      deployments: cloneDeployments(FIXTURE_DEPLOYMENTS).map(normalizeDeployment),
       adapterSource: 'fixture-fallback',
     };
   }
@@ -155,7 +177,7 @@ function readConfiguredDeployments(): { deployments: DeploymentStatus[]; adapter
 
     if (Array.isArray(parsed)) {
       return {
-        deployments: cloneDeployments(parsed as DeploymentStatus[]),
+        deployments: cloneDeployments(parsed as DeploymentStatus[]).map(normalizeDeployment),
         adapterSource: 'configured-json',
       };
     }
@@ -164,7 +186,7 @@ function readConfiguredDeployments(): { deployments: DeploymentStatus[]; adapter
   }
 
   return {
-    deployments: cloneDeployments(FIXTURE_DEPLOYMENTS),
+    deployments: cloneDeployments(FIXTURE_DEPLOYMENTS).map(normalizeDeployment),
     adapterSource: 'fixture-fallback',
   };
 }

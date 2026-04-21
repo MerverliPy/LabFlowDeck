@@ -1,4 +1,8 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
+
+import { createWorkflowAction } from '../actions';
+import { getProjectStore } from '../../../lib/project-store';
 
 const templates = [
   {
@@ -6,18 +10,21 @@ const templates = [
     detail: 'Installs dependencies, runs the default test suite, and summarizes failures.',
     badge: 'badgeBlue',
     state: 'Suggested',
+    value: 'run-tests',
   },
   {
     name: 'Build Project',
     detail: 'Runs a production build and captures the final artifact and warnings summary.',
     badge: 'badgeGreen',
     state: 'Ready',
+    value: 'build-project',
   },
   {
     name: 'Inspect Repo',
     detail: 'Scans configs, docs, and recent diffs to prepare a focused review prompt.',
     badge: 'badgeAmber',
     state: 'Review',
+    value: 'inspect-repo',
   },
 ];
 
@@ -36,7 +43,7 @@ const steps = [
   },
   {
     title: 'Assign projects',
-    description: 'Attach the workflow to one or more projects after the shell is saved.',
+    description: 'Attach the workflow to one or more stored project shells.',
   },
 ];
 
@@ -64,31 +71,32 @@ const schedules = [
     detail: 'Useful while the workflow is still being tuned.',
     badge: 'badgeBlue',
     state: 'Selected',
+    value: 'manual-only',
   },
   {
     name: 'Weekdays · 08:30 UTC',
     detail: 'Runs a morning health pass before deploy windows.',
     badge: 'badgeGreen',
     state: 'Available',
+    value: 'weekday-morning',
   },
 ];
 
-const assignments = [
-  {
-    name: 'LabFlowDeck',
-    detail: 'Primary web shell with active build checks',
-    badge: 'badgeGreen',
-    state: 'Attach first',
-  },
-  {
-    name: 'PromptShield',
-    detail: 'Use after template tuning and repo validation',
-    badge: 'badgeAmber',
-    state: 'Later',
-  },
-];
+type NewWorkflowPageProps = {
+  searchParams?: Promise<{
+    status?: string;
+  }>;
+};
 
-export default function NewWorkflowPage() {
+export default async function NewWorkflowPage({ searchParams }: NewWorkflowPageProps) {
+  if (process.env.NODE_ENV !== 'test') {
+    noStore();
+  }
+
+  const params = searchParams ? await searchParams : undefined;
+  const availableProjects = await getProjectStore().listProjects();
+  const showError = params?.status === 'missing-fields';
+
   return (
     <main className="shell">
       <section className="header">
@@ -96,7 +104,7 @@ export default function NewWorkflowPage() {
           <div className="eyebrow">LabFlowDeck</div>
           <h1>New workflow</h1>
           <p className="subtle">
-            A lightweight guided shell for creating reusable agent workflows before live execution and persistence are wired.
+            A lightweight guided shell for saving reusable workflows before live execution and schedule runners are wired.
           </p>
         </div>
         <Link className="badge badgeBlue" href="/agents">
@@ -104,7 +112,7 @@ export default function NewWorkflowPage() {
         </Link>
       </section>
 
-      <div className="grid">
+      <form action={createWorkflowAction} className="grid">
         <section className="card flowIntroCard">
           <div className="cardTitle">
             <h2>Create workflow flow</h2>
@@ -124,26 +132,46 @@ export default function NewWorkflowPage() {
           </div>
         </section>
 
+        {showError ? (
+          <section className="card flowErrorCard">
+            <div className="cardTitle">
+              <h2>Workflow details missing</h2>
+              <span className="badge badgeAmber">Check steps 1 and 4</span>
+            </div>
+            <p className="subtle flowHint">
+              Enter a workflow name and keep at least one project attached before saving the bounded reusable workflow record.
+            </p>
+          </section>
+        ) : null}
+
         <section className="card flowCard">
           <div className="cardTitle">
             <h2>Step 1 · Template gallery</h2>
             <span className="badge badgeBlue">Choose a base</span>
           </div>
 
+          <div className="inputStack">
+            <label className="fieldShell fieldShellInteractive" htmlFor="workflow-name">
+              <div className="fieldLabel">Workflow name</div>
+              <input className="fieldInput" defaultValue="Build + Validate" id="workflow-name" name="name" required type="text" />
+            </label>
+          </div>
+
           <div className="selectionStack">
             {templates.map((template, index) => (
-              <div className={`selectionCard${index === 0 ? ' selectionCardActive' : ''}`} key={template.name}>
+              <label className={`selectionCard selectionChoice${index === 0 ? ' selectionCardActive' : ''}`} key={template.name}>
+                <input className="selectionInput" defaultChecked={index === 0} name="template" type="radio" value={template.value} />
                 <div className="selectionBody">
                   <div className="selectionTitle">{template.name}</div>
                   <p className="subtle selectionCopy">{template.detail}</p>
                 </div>
                 <span className={`badge ${template.badge}`}>{template.state}</span>
-              </div>
+              </label>
             ))}
           </div>
 
           <p className="subtle flowHint">
-            This placeholder gallery mirrors the `SPEC.md` template-first path without introducing editor or provider wiring yet.
+            The shell saves the selected template name and schedule into a bounded reusable workflow record. Editor wiring and provider execution remain out of scope.
           </p>
         </section>
 
@@ -164,6 +192,10 @@ export default function NewWorkflowPage() {
               </div>
             ))}
           </div>
+
+          <p className="subtle flowHint">
+            This static preview keeps the shell honest about step intent while full workflow editing remains out of scope.
+          </p>
         </section>
 
         <section className="card flowCard">
@@ -174,13 +206,14 @@ export default function NewWorkflowPage() {
 
           <div className="selectionStack">
             {schedules.map((schedule, index) => (
-              <div className={`selectionCard${index === 0 ? ' selectionCardActive' : ''}`} key={schedule.name}>
+              <label className={`selectionCard selectionChoice${index === 0 ? ' selectionCardActive' : ''}`} key={schedule.name}>
+                <input className="selectionInput" defaultChecked={index === 0} name="schedule" type="radio" value={schedule.value} />
                 <div className="selectionBody">
                   <div className="selectionTitle">{schedule.name}</div>
                   <p className="subtle selectionCopy">{schedule.detail}</p>
                 </div>
                 <span className={`badge ${schedule.badge}`}>{schedule.state}</span>
-              </div>
+              </label>
             ))}
           </div>
         </section>
@@ -192,36 +225,57 @@ export default function NewWorkflowPage() {
           </div>
 
           <div className="selectionStack">
-            {assignments.map((assignment, index) => (
-              <div className={`selectionCard${index === 0 ? ' selectionCardActive' : ''}`} key={assignment.name}>
+            {availableProjects.length === 0 ? (
+              <div className="selectionCard">
                 <div className="selectionBody">
-                  <div className="selectionTitle">{assignment.name}</div>
-                  <p className="subtle selectionCopy">{assignment.detail}</p>
+                  <div className="selectionTitle">No projects available yet</div>
+                  <p className="subtle selectionCopy">
+                    Save a placeholder project first so this bounded workflow can attach to a real project shell.
+                  </p>
                 </div>
-                <span className={`badge ${assignment.badge}`}>{assignment.state}</span>
+                <span className="badge badgeAmber">Unavailable</span>
               </div>
-            ))}
+            ) : (
+              availableProjects.map((project, index) => (
+                <label className={`selectionCard selectionChoice${index === 0 ? ' selectionCardActive' : ''}`} key={project.slug}>
+                  <input
+                    className="selectionInput"
+                    defaultChecked={index === 0}
+                    name="projects"
+                    type="checkbox"
+                    value={project.slug}
+                  />
+                  <div className="selectionBody">
+                    <div className="selectionTitle">{project.name}</div>
+                    <p className="subtle selectionCopy">
+                      {project.repo} · {project.workflow.label}
+                    </p>
+                  </div>
+                  <span className={`badge ${project.host.badge}`}>{index === 0 ? 'Attach first' : 'Available'}</span>
+                </label>
+              ))
+            )}
           </div>
         </section>
 
         <section className="card flowFooterCard">
           <div className="cardTitle">
-            <h2>Ready for the next implementation phase</h2>
-            <span className="badge badgeBlue">Placeholder</span>
+            <h2>Ready to save</h2>
+            <span className="badge badgeBlue">Bounded store</span>
           </div>
           <p className="subtle flowHint">
-            This route completes the missing CTA destination and shows the intended workflow-creation path. Real saving, editing, scheduling, and run execution remain intentionally out of scope until backend-backed workflow management is selected.
+            This route now saves a bounded reusable workflow record for the single-user shell. Editing, live execution, and schedule runners still remain intentionally out of scope.
           </p>
           <div className="flowActions">
             <Link className="secondaryCta ctaLink" href="/agents">
               Return to workflows
             </Link>
-            <Link className="primaryCta ctaLink" href="/agents">
-              Save placeholder workflow
-            </Link>
+            <button className="primaryCta" disabled={availableProjects.length === 0} type="submit">
+              Save workflow shell
+            </button>
           </div>
         </section>
-      </div>
+      </form>
 
       <nav className="bottomNav" aria-label="Primary">
         <Link className="navLink" href="/">
