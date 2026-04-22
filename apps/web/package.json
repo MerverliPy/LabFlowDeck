@@ -20,6 +20,8 @@
     "@types/node": "22.14.0",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^15.5.15",
     "jsdom": "26.1.0",
     "typescript": "5.8.3",
     "vitest": "3.1.3"

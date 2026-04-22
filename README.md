@@ -132,3 +132,5 @@ If you deployed this app while it was pinned to an older vulnerable Next.js App 
 ## Notes
 
 This is an intentionally thin first scaffold. It establishes the repo shape, execution workflow, and a credible product shell without pretending the full platform is already implemented.
+
+< repo automation smoke test -->
