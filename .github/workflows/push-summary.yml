@@ -1,0 +1,124 @@
+name: Push Summary
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish push summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- labflowdeck:push-summary -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const before = context.payload.before;
+            const after = context.payload.after;
+
+            let files = [];
+            let compareCommitCount = 0;
+
+            if (before && !/^0+$/.test(before)) {
+              const compare = await github.rest.repos.compareCommitsWithBasehead({
+                owner,
+                repo,
+                basehead: `${before}...${after}`,
+              });
+
+              files = compare.data.files || [];
+              compareCommitCount = (compare.data.commits || []).length;
+            }
+
+            const commitLines = (context.payload.commits || []).slice(-10).map((commit) => {
+              const title = (commit.message || '').split('\n')[0];
+              return `- \`${commit.id.slice(0, 7)}\` ${title}`;
+            });
+
+            if (commitLines.length === 0) {
+              commitLines.push(`- \`${after.slice(0, 7)}\` No commit payload was attached to this push event.`);
+            }
+
+            const fileLines = files.length === 0
+              ? ['- No changed files were reported for this push compare.']
+              : files.slice(0, 20).map((file) => `- \`${file.filename}\` (+${file.additions || 0}/-${file.deletions || 0})`);
+
+            if (files.length > 20) {
+              fileLines.push(`- …and ${files.length - 20} more file(s).`);
+            }
+
+            const prResponse = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha: after,
+            });
+
+            const linkedPr = (prResponse.data || []).find((pr) => pr.base?.ref === 'main') || null;
+
+            const summaryLines = [
+              marker,
+              '## Push summary',
+              `- Branch: \`${context.payload.ref.replace('refs/heads/', '')}\``,
+              `- Range: \`${before ? before.slice(0, 7) : 'unknown'}\` → \`${after.slice(0, 7)}\``,
+              `- Commits in push payload: ${(context.payload.commits || []).length}`,
+              `- Commits in compare: ${compareCommitCount}`,
+              `- Files changed: ${files.length}`,
+              `- Linked PR: ${linkedPr ? `#${linkedPr.number}` : 'none detected'}`,
+              '',
+              '## Commits',
+              ...commitLines,
+              '',
+              '## Changed files',
+              ...fileLines,
+            ];
+
+            const summaryBody = summaryLines.join('\n');
+
+            await core.summary
+              .addHeading('Push summary')
+              .addRaw(summaryBody)
+              .write();
+
+            if (!linkedPr) {
+              core.notice('No PR was associated with this main-branch push. Summary written to the workflow run only.');
+              return;
+            }
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number: linkedPr.number,
+                per_page: 100,
+              }
+            );
+
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: summaryBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: linkedPr.number,
+                body: summaryBody,
+              });
+            }

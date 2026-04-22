@@ -679,7 +679,16 @@ candidates:
 
   - id: workflow-shell-truth-evals
     title: Expand Promptfoo workflow evals so agents do not overstate live GitHub, host, or deploy capabilities
-    status: pending
+    status: completed
+    completion_note: Replaced the external-provider workflow audit path with a repo-local Promptfoo provider, strengthened runtime-truth eval assertions, and verified the internal workflow audit runs without extra manual setup.
+    validation_result: passed
+    completed_at: 2026-04-22T12:26:23Z
+    evidence_refs:
+      - promptfooconfig.workflow.yaml
+      - scripts/audit-workflow-opencode.sh
+      - scripts/promptfoo-workflow-provider.js
+      - .opencode/plans/current-phase.md:97-134
+      - .opencode/plans/history/20260422T122623Z--workflow-shell-truth-evals.md
     module: .opencode
     priority: 16
     files:

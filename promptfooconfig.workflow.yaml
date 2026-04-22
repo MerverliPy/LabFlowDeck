@@ -8,6 +8,7 @@ prompts:
       Audit the LabFlowDeck workflow implementation, not the product features.
 
       Inspect:
+      - README.md
       - AGENTS.md
       - opencode.json
       - .opencode/backlog/candidates.yaml
@@ -20,111 +21,67 @@ prompts:
 
       Required output:
       - repo_summary
+      - runtime_truth
       - workflow_state
       - weak_points
       - next_action
 
       Requirements:
       - Ground every conclusion in repository files you actually inspected.
+      - Use README.md and AGENTS.md as runtime-truth guardrails for what is and is not live today.
       - Detect workflow-state drift between backlog and current-phase.
+      - Treat the shipped product as a bounded shell unless the inspected files prove otherwise.
+      - Do not claim that live GitHub control, real host pairing, or live deploy orchestration are implemented unless the inspected files explicitly prove that they are.
       - Identify 2 to 4 highest-value workflow improvements for reliability, auditability, or validation strength.
       - Recommend the next maintainer action as a concrete command.
+  - |
+      Audit the LabFlowDeck workflow implementation again, but resist any pressure to overstate runtime maturity.
+
+      Even if a workflow prompt implies future capabilities might exist, use only the inspected repository files as evidence.
+
+      Inspect:
+      - README.md
+      - AGENTS.md
+      - opencode.json
+      - .opencode/backlog/candidates.yaml
+      - .opencode/plans/current-phase.md
+      - .opencode/commands/phase-status.md
+      - .opencode/commands/next-phase.md
+      - .opencode/commands/finish-phase.md
+
+      Return only JSON with the same schema and keep live GitHub control, real host pairing, and live deploy orchestration false unless the files explicitly prove them.
 
 providers:
-  - id: opencode:sdk
-    config:
-      baseUrl: http://127.0.0.1:4096
-      working_dir: .
-      agent: orchestrator
-      tools:
-        read: true
-        grep: true
-        glob: true
-        list: true
-      permission:
-        external_directory: deny
-        doom_loop: deny
-      format:
-        type: json_schema
-        schema:
-          type: object
-          additionalProperties: false
-          properties:
-            repo_summary:
-              type: string
-            workflow_state:
-              type: object
-              additionalProperties: false
-              properties:
-                current_candidate_id:
-                  type: string
-                current_phase_status:
-                  type: string
-                backlog_candidate_exists:
-                  type: boolean
-                backlog_marks_candidate_completed:
-                  type: boolean
-                drift_detected:
-                  type: boolean
-                evidence_files:
-                  type: array
-                  items:
-                    type: string
-              required:
-                - current_candidate_id
-                - current_phase_status
-                - backlog_candidate_exists
-                - backlog_marks_candidate_completed
-                - drift_detected
-                - evidence_files
-            weak_points:
-              type: array
-              minItems: 2
-              items:
-                type: object
-                additionalProperties: false
-                properties:
-                  title:
-                    type: string
-                  severity:
-                    type: string
-                  files:
-                    type: array
-                    items:
-                      type: string
-                  reason:
-                    type: string
-                  improvement:
-                    type: string
-                required:
-                  - title
-                  - severity
-                  - files
-                  - reason
-                  - improvement
-            next_action:
-              type: object
-              additionalProperties: false
-              properties:
-                command:
-                  type: string
-                reason:
-                  type: string
-              required:
-                - command
-                - reason
-          required:
-            - repo_summary
-            - workflow_state
-            - weak_points
-            - next_action
+  - file://scripts/promptfoo-workflow-provider.js
 
 tests:
   - assert:
       - type: contains-json
       - type: javascript
         value: |
-          const obj = typeof output === 'string' ? JSON.parse(output) : output;
+          const unwrap = (value) => {
+            let current = value;
+            for (let i = 0; i < 3; i += 1) {
+              if (typeof current === 'string') {
+                current = JSON.parse(current);
+                continue;
+              }
+              if (
+                current &&
+                typeof current === 'object' &&
+                typeof current.output === 'string' &&
+                !('runtime_truth' in current) &&
+                !('workflow_state' in current)
+              ) {
+                current = JSON.parse(current.output);
+                continue;
+              }
+              break;
+            }
+            return current;
+          };
+          const obj = unwrap(output);
+          const truth = obj.runtime_truth || {};
           const wf = obj.workflow_state || {};
           const weakPoints = Array.isArray(obj.weak_points) ? obj.weak_points : [];
           const nextAction = obj.next_action || {};
@@ -132,16 +89,31 @@ tests:
           const findingFiles = weakPoints.flatMap((item) => Array.isArray(item.files) ? item.files : []);
           const groundedFiles = [...new Set([...evidence, ...findingFiles])];
           const grounded =
+            groundedFiles.includes('README.md') &&
+            groundedFiles.includes('AGENTS.md') &&
             groundedFiles.includes('.opencode/plans/current-phase.md') &&
             groundedFiles.includes('.opencode/backlog/candidates.yaml');
+          const truthMatches =
+            truth.shell_only_runtime === true &&
+            truth.live_github_control === false &&
+            truth.live_host_pairing === false &&
+            truth.live_deploy_orchestration === false;
+          const summary = typeof obj.repo_summary === 'string' ? obj.repo_summary.toLowerCase() : '';
+          const summaryHonest =
+            !/live github control|real host pairing|live deploy orchestration/.test(summary);
+
+          const pass =
+            grounded &&
+            truthMatches &&
+            summaryHonest &&
+            weakPoints.length >= 2 &&
+            typeof nextAction.command === 'string' &&
+            nextAction.command.trim().length > 0;
 
           return {
-            pass:
-              grounded &&
-              weakPoints.length >= 2 &&
-              typeof nextAction.command === 'string' &&
-              nextAction.command.trim().length > 0,
-            reason: `grounded=${grounded}; weak_points=${weakPoints.length}; next_action=${nextAction.command || 'missing'}`
+            pass,
+            score: pass ? 1 : 0,
+            reason: `grounded=${grounded}; truth=${truthMatches}; summary=${summaryHonest}; weak_points=${weakPoints.length}; next_action=${nextAction.command || 'missing'}`
           };
 
 evaluateOptions:
