@@ -8,7 +8,7 @@ on:
 permissions:
   contents: read
   issues: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   summary:
@@ -27,16 +27,21 @@ jobs:
 
             let files = [];
             let compareCommitCount = 0;
+            let linkedPr = null;
 
-            if (before && !/^0+$/.test(before)) {
-              const compare = await github.rest.repos.compareCommitsWithBasehead({
-                owner,
-                repo,
-                basehead: `${before}...${after}`,
-              });
+            try {
+              if (before && !/^0+$/.test(before)) {
+                const compare = await github.rest.repos.compareCommitsWithBasehead({
+                  owner,
+                  repo,
+                  basehead: `${before}...${after}`,
+                });
 
-              files = compare.data.files || [];
-              compareCommitCount = (compare.data.commits || []).length;
+                files = compare.data.files || [];
+                compareCommitCount = (compare.data.commits || []).length;
+              }
+            } catch (error) {
+              core.warning(`Commit compare failed for ${before}...${after}: ${error.message}`);
             }
 
             const commitLines = (context.payload.commits || []).slice(-10).map((commit) => {
@@ -56,13 +61,17 @@ jobs:
               fileLines.push(`- …and ${files.length - 20} more file(s).`);
             }
 
-            const prResponse = await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              owner,
-              repo,
-              commit_sha: after,
-            });
+            try {
+              const prResponse = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                owner,
+                repo,
+                commit_sha: after,
+              });
 
-            const linkedPr = (prResponse.data || []).find((pr) => pr.base?.ref === 'main') || null;
+              linkedPr = (prResponse.data || []).find((pr) => pr.base?.ref === 'main') || null;
+            } catch (error) {
+              core.warning(`PR association lookup failed for ${after}: ${error.message}`);
+            }
 
             const summaryLines = [
               marker,
@@ -93,32 +102,36 @@ jobs:
               return;
             }
 
-            const comments = await github.paginate(
-              github.rest.issues.listComments,
-              {
-                owner,
-                repo,
-                issue_number: linkedPr.number,
-                per_page: 100,
+            try {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                {
+                  owner,
+                  repo,
+                  issue_number: linkedPr.number,
+                  per_page: 100,
+                }
+              );
+
+              const existing = comments.find(
+                (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker)
+              );
+
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: existing.id,
+                  body: summaryBody,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number: linkedPr.number,
+                  body: summaryBody,
+                });
               }
-            );
-
-            const existing = comments.find(
-              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker)
-            );
-
-            if (existing) {
-              await github.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: existing.id,
-                body: summaryBody,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number: linkedPr.number,
-                body: summaryBody,
-              });
+            } catch (error) {
+              core.warning(`PR comment update failed for #${linkedPr.number}: ${error.message}`);
             }
