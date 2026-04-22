@@ -1,0 +1,152 @@
+name: PR Summary
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - labeled
+      - unlabeled
+      - ready_for_review
+      - edited
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  sticky-summary:
+    if: github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update sticky PR summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- labflowdeck:pr-summary -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pr = context.payload.pull_request;
+            const bodyText = (pr.body || '').toLowerCase();
+
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner,
+                repo,
+                pull_number: pr.number,
+                per_page: 100,
+              }
+            );
+
+            const labels = (pr.labels || []).map((label) => label.name).sort();
+            const totalAdditions = files.reduce((sum, file) => sum + (file.additions || 0), 0);
+            const totalDeletions = files.reduce((sum, file) => sum + (file.deletions || 0), 0);
+
+            const touches = {
+              web: files.some((file) => file.filename.startsWith('apps/web/')),
+              workflow: files.some(
+                (file) =>
+                  file.filename.startsWith('.opencode/')
+                  || file.filename.startsWith('scripts/')
+                  || file.filename === 'promptfooconfig.workflow.yaml'
+                  || file.filename === 'opencode.json'
+              ),
+              docs: files.some(
+                (file) =>
+                  file.filename === 'README.md'
+                  || file.filename === 'SPEC.md'
+                  || file.filename.startsWith('docs/')
+              ),
+              repo: files.some(
+                (file) =>
+                  file.filename.startsWith('.github/')
+                  || ['package.json', 'pnpm-lock.yaml', '.gitignore'].includes(file.filename)
+              ),
+            };
+
+            const hasChecked = (value) =>
+              bodyText.includes(`- [x] \`${value.toLowerCase()}\``)
+              || bodyText.includes(`- [x] ${value.toLowerCase()}`);
+
+            const validationLines = [
+              `- \`pnpm install --frozen-lockfile\`: ${hasChecked('pnpm install --frozen-lockfile') ? 'declared' : 'not declared'}`,
+              `- \`pnpm lint:web\`: ${hasChecked('pnpm lint:web') ? 'declared' : 'not declared'}`,
+              `- \`pnpm test:web\`: ${hasChecked('pnpm test:web') ? 'declared' : 'not declared'}`,
+              `- \`pnpm typecheck:web\`: ${hasChecked('pnpm typecheck:web') ? 'declared' : 'not declared'}`,
+              `- \`pnpm build:web\`: ${hasChecked('pnpm build:web') ? 'declared' : 'not declared'}`,
+            ];
+
+            const changedFiles = files.length === 0
+              ? ['- No changed files reported yet.']
+              : files.slice(0, 20).map((file) => {
+                  const status = file.status || 'modified';
+                  return `- \`${file.filename}\` (${status}, +${file.additions || 0}/-${file.deletions || 0})`;
+                });
+
+            if (files.length > 20) {
+              changedFiles.push(`- …and ${files.length - 20} more file(s).`);
+            }
+
+            const releaseSignal =
+              labels.find((label) => ['semver:major', 'semver:minor', 'semver:patch', 'skip-changelog'].includes(label))
+              || 'missing';
+
+            const summaryLines = [
+              marker,
+              '## PR summary',
+              `- Title: ${pr.title}`,
+              `- Base: \`${pr.base.ref}\` ← Head: \`${pr.head.ref}\``,
+              `- Draft: ${pr.draft ? 'yes' : 'no'}`,
+              `- Files changed: ${files.length}`,
+              `- Diff size: +${totalAdditions}/-${totalDeletions}`,
+              `- Labels: ${labels.length ? labels.map((label) => `\`${label}\``).join(', ') : 'none'}`,
+              `- Release signal: ${releaseSignal === 'missing' ? '**missing semver or skip-changelog label**' : `\`${releaseSignal}\``}`,
+              '',
+              '## Scope signals',
+              `- Web app: ${touches.web ? 'yes' : 'no'}`,
+              `- Workflow tooling: ${touches.workflow ? 'yes' : 'no'}`,
+              `- Documentation: ${touches.docs ? 'yes' : 'no'}`,
+              `- Repo / CI: ${touches.repo ? 'yes' : 'no'}`,
+              '',
+              '## Declared validation',
+              ...validationLines,
+              '',
+              '## Changed files',
+              ...changedFiles,
+            ];
+
+            const commentBody = summaryLines.join('\n');
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number: pr.number,
+                per_page: 100,
+              }
+            );
+
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body: commentBody,
+              });
+            }

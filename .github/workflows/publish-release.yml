@@ -1,0 +1,139 @@
+name: Publish Release
+
+on:
+  workflow_run:
+    workflows:
+      - Release Drafter
+    types:
+      - completed
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: read
+
+jobs:
+  publish:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Publish drafted release and tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const marker = '<!-- labflowdeck:release-summary -->';
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const headSha = context.payload.workflow_run.head_sha;
+
+            const prResponse = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner,
+              repo,
+              commit_sha: headSha,
+            });
+
+            const linkedPr = (prResponse.data || []).find((pr) => pr.base?.ref === 'main') || null;
+
+            if (!linkedPr) {
+              core.notice('No PR was associated with this release-drafter-triggering commit.');
+              return;
+            }
+
+            const labels = (linkedPr.labels || []).map((label) => label.name);
+            const shouldSkip = labels.includes('skip-changelog');
+            const semverLabels = ['semver:major', 'semver:minor', 'semver:patch'];
+            const matchedSemver = labels.filter((label) => semverLabels.includes(label));
+
+            if (shouldSkip) {
+              core.notice(`Skipping release publish for PR #${linkedPr.number} because it is labeled skip-changelog.`);
+              return;
+            }
+
+            if (matchedSemver.length !== 1) {
+              core.notice(`Skipping release publish for PR #${linkedPr.number} because semver labels are invalid: ${matchedSemver.join(', ') || 'none'}.`);
+              return;
+            }
+
+            const releases = await github.paginate(
+              github.rest.repos.listReleases,
+              {
+                owner,
+                repo,
+                per_page: 100,
+              }
+            );
+
+            const draft = releases.find((release) => release.draft);
+
+            if (!draft) {
+              core.notice('No draft release is available to publish.');
+              return;
+            }
+
+            const alreadyPublished = releases.find(
+              (release) => !release.draft && release.tag_name === draft.tag_name
+            );
+
+            if (alreadyPublished) {
+              core.notice(`Release ${draft.tag_name} is already published.`);
+              return;
+            }
+
+            const published = await github.rest.repos.updateRelease({
+              owner,
+              repo,
+              release_id: draft.id,
+              draft: false,
+              prerelease: false,
+              name: draft.name,
+              body: draft.body,
+            });
+
+            const summaryLines = [
+              marker,
+              '## Release published',
+              `- PR: #${linkedPr.number}`,
+              `- Version tag: \`${published.data.tag_name}\``,
+              `- Release: [${published.data.name || published.data.tag_name}](${published.data.html_url})`,
+              `- Commit: \`${headSha.slice(0, 7)}\``,
+              `- Release label: \`${matchedSemver[0]}\``,
+              `- Triggered by workflow run: \`${context.payload.workflow_run.name}\``,
+            ];
+
+            const summaryBody = summaryLines.join('\n');
+
+            await core.summary
+              .addHeading('Release published')
+              .addRaw(summaryBody)
+              .write();
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              {
+                owner,
+                repo,
+                issue_number: linkedPr.number,
+                per_page: 100,
+              }
+            );
+
+            const existing = comments.find(
+              (comment) => comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: summaryBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: linkedPr.number,
+                body: summaryBody,
+              });
+            }
