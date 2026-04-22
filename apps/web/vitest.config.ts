@@ -5,6 +5,7 @@ export default defineConfig({
     jsx: 'automatic',
   },
   test: {
+    exclude: ['e2e/**', '**/e2e/**', 'node_modules/**', '.next/**'],
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
