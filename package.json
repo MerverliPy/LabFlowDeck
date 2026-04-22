@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@opencode-ai/sdk": "^1.14.20",
+    "@playwright/test": "^1.59.1",
     "promptfoo": "^0.121.5"
   }
 }

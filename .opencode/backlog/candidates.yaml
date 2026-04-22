@@ -649,7 +649,17 @@ candidates:
 
   - id: mobile-playwright-smoke
     title: Add Playwright mobile smoke coverage for auth entry and bounded project creation
-    status: pending
+    status: completed
+    completion_note: Added bounded repo-root Playwright smoke coverage for unauthenticated login and placeholder project creation, then validated the mobile shell flows with a passing Playwright run.
+    validation_result: passed
+    completed_at: 2026-04-22T07:28:52Z
+    evidence_refs:
+      - package.json
+      - pnpm-lock.yaml
+      - playwright.config.ts
+      - apps/web/e2e/auth-shell.spec.ts
+      - apps/web/e2e/projects-create.spec.ts
+      - .opencode/plans/history/20260422T072957Z--mobile-playwright-smoke.md
     module: apps/web
     priority: 18
     files:
