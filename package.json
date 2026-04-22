@@ -22,7 +22,7 @@
     "workflow:archive-phase": "bash scripts/archive-current-phase.sh"
   },
   "devDependencies": {
-    "@opencode-ai/sdk": "^1.14.19",
+    "@opencode-ai/sdk": "^1.14.20",
     "promptfoo": "^0.121.5"
   }
 }
