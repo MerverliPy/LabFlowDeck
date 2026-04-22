@@ -351,7 +351,18 @@ candidates:
 
   - id: github-auth-shell-session
     title: Add a bounded GitHub login flow and session presence for the shell without claiming downstream repo integration
-    status: pending
+    status: completed
+    completion_note: Reconciled the bounded GitHub login and shell-session phase from existing repo state, confirmed honest auth/session behavior, and validated the shipped routes with a passing web build.
+    validation_result: passed
+    completed_at: 2026-04-22T05:17:27Z
+    evidence_refs:
+      - apps/web/app/login/page.tsx
+      - apps/web/app/auth/github/route.ts
+      - apps/web/app/auth/github/callback/route.ts
+      - apps/web/app/layout.tsx
+      - apps/web/lib/github-auth.ts
+      - README.md
+      - .opencode/plans/history/20260422T051727Z--github-auth-shell-session.md
     module: apps/web
     priority: 34
     files:
@@ -371,7 +382,18 @@ candidates:
 
   - id: clone-backend-internal-workflow
     title: Clone the backend internal workflow command surface and guard scripts into LabFlowDeck
-    status: pending
+    status: completed
+    completion_note: Cloned the backend-style internal workflow rules, command surface, and repo-owned guard scripts into LabFlowDeck, then reconciled phase state so later selection could advance safely.
+    validation_result: passed
+    completed_at: 2026-04-22T05:11:08Z
+    evidence_refs:
+      - .opencode/AGENTS.md
+      - .opencode/commands/autoflow.md
+      - .opencode/commands/workflow-check.md
+      - scripts/dev/workflow-check.sh
+      - scripts/dev/autoflow.sh
+      - scripts/phase-status-json.py
+      - .opencode/plans/history/20260422T051108Z--clone-backend-internal-workflow.md
     module: .opencode
     priority: 33
     files:
@@ -403,7 +425,17 @@ candidates:
 
   - id: github-repo-picker-live-source
     title: Add a bounded live GitHub repository picker to the new project flow
-    status: pending
+    status: completed
+    completion_note: Reconciled the bounded GitHub repo-picker phase from existing repo state, confirming live repo selection, manual fallback, and placeholder-project persistence without widening into browsing or sync.
+    validation_result: passed
+    completed_at: 2026-04-22T06:11:01Z
+    evidence_refs:
+      - apps/web/lib/github.ts:34-112
+      - apps/web/app/api/github/repos/route.ts:1-17
+      - apps/web/app/projects/new/page.tsx:83-216
+      - apps/web/app/projects/actions.ts:15-67
+      - apps/web/lib/project-store.ts:415-538
+      - .opencode/plans/history/20260422T061101Z--github-repo-picker-live-source.md
     module: apps/web
     priority: 32
     files:
