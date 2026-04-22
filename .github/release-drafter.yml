@@ -1,0 +1,78 @@
+name-template: "v$RESOLVED_VERSION"
+tag-template: "v$RESOLVED_VERSION"
+
+template: |
+  ## What changed
+  $CHANGES
+
+  ## Validation reminder
+  - Confirm `pnpm lint:web`
+  - Confirm `pnpm test:web`
+  - Confirm `pnpm typecheck:web`
+  - Confirm `pnpm build:web`
+
+change-template: "- $TITLE (#$NUMBER) @$AUTHOR"
+no-changes-template: "- No user-facing changes in this draft."
+
+categories:
+  - title: "Web app"
+    labels:
+      - "area:web"
+  - title: "Workflow tooling"
+    labels:
+      - "area:workflow"
+  - title: "Documentation"
+    labels:
+      - "area:docs"
+  - title: "Repository maintenance"
+    labels:
+      - "area:repo"
+  - title: "Security"
+    labels:
+      - "type:security"
+
+exclude-labels:
+  - "skip-changelog"
+
+version-resolver:
+  major:
+    labels:
+      - "semver:major"
+  minor:
+    labels:
+      - "semver:minor"
+  patch:
+    labels:
+      - "semver:patch"
+      - "type:fix"
+  default: patch
+
+autolabeler:
+  - label: "area:web"
+    files:
+      - "apps/web/**"
+
+  - label: "area:workflow"
+    files:
+      - ".opencode/**"
+      - "scripts/**"
+      - "promptfooconfig.workflow.yaml"
+      - "opencode.json"
+
+  - label: "area:docs"
+    files:
+      - "README.md"
+      - "SPEC.md"
+      - "docs/**"
+
+  - label: "area:repo"
+    files:
+      - ".github/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".gitignore"
+
+  - label: "type:test"
+    files:
+      - "**/*.test.*"
+      - "**/*.spec.*"

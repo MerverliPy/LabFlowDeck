@@ -13,6 +13,17 @@
     "reserved": 12000
   },
   "instructions": ["AGENTS.md"],
+  "watcher": {
+    "ignore": [
+      "node_modules/**",
+      "apps/**/node_modules/**",
+      ".git/**",
+      ".next/**",
+      "apps/**/.next/**",
+      "coverage/**",
+      ".opencode/node_modules/**"
+    ]
+  },
   "mcp": {
     "github_readonly": {
       "enabled": false

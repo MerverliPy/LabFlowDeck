@@ -1,3 +1,8 @@
+---
+description: Inspect current phase and backlog drift state
+agent: orchestrator
+---
+
 # /phase-status
 
 Inspect `.opencode/plans/current-phase.md` and `.opencode/backlog/candidates.yaml`.

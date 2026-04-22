@@ -39,10 +39,7 @@ This keeps planning explicit, implementation bounded, and validation auditable.
 
 The repo's internal OpenCode workflow path can be switched manually between OpenAI and GitHub Copilot without hand-editing multiple files:
 
-```
-
-`LABFLOWDECK_SESSION_SECRET` signs the app session cookies and should not reuse `GITHUB_CLIENT_SECRET`.
-bash
+```bash
 pnpm workflow:provider -- openai
 pnpm workflow:provider -- copilot
 pnpm workflow:provider -- current

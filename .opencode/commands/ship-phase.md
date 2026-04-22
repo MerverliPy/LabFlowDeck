@@ -1,3 +1,8 @@
+---
+description: Prepare a completed phase for commit or PR handoff
+agent: shipper
+---
+
 # /ship-phase
 
 Prepare the completed phase for commit or PR handoff.

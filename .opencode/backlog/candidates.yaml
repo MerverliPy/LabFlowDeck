@@ -369,6 +369,38 @@ candidates:
       - Unauthenticated users are guided into login from the shell.
       - The web app build passes.
 
+  - id: clone-backend-internal-workflow
+    title: Clone the backend internal workflow command surface and guard scripts into LabFlowDeck
+    status: pending
+    module: .opencode
+    priority: 33
+    files:
+      - .opencode/AGENTS.md
+      - .opencode/agents/orchestrator.md
+      - .opencode/agents/builder.md
+      - .opencode/agents/validator.md
+      - .opencode/agents/shipper.md
+      - .opencode/agents/reviewer.md
+      - .opencode/commands/autoflow.md
+      - .opencode/commands/validate-phase.md
+      - .opencode/commands/review-phase.md
+      - .opencode/commands/fix-validation.md
+      - .opencode/commands/workflow-check.md
+      - scripts/dev/workflow-check.sh
+      - scripts/dev/autoflow.sh
+      - scripts/phase-status-json.py
+      - package.json
+      - opencode.json
+      - .opencode/plans/current-phase.md
+    validation: |
+      bash scripts/dev/workflow-check.sh
+      bash scripts/dev/autoflow.sh inspect-json
+    acceptance:
+      - LabFlowDeck gains backend-style internal workflow rules, richer command surfaces, and repo-owned guard scripts without changing `apps/web` product behavior.
+      - "`/autoflow`, `/review-phase`, `/validate-phase`, `/fix-validation`, and `/workflow-check` exist as repo-owned custom commands."
+      - The new workflow scripts read the existing LabFlowDeck backlog/current-phase state instead of inventing a separate release registry layer.
+      - Internal workflow validation passes with the new scripts.
+
   - id: github-repo-picker-live-source
     title: Add a bounded live GitHub repository picker to the new project flow
     status: pending

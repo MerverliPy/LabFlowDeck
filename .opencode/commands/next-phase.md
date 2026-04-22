@@ -1,3 +1,8 @@
+---
+description: Select the next implementation phase from backlog using the orchestrator rules
+agent: orchestrator
+---
+
 # /next-phase
 
 Select the next implementation phase from `.opencode/backlog/candidates.yaml` using the orchestrator rules.

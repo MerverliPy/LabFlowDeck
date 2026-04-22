@@ -6,6 +6,8 @@ mkdir -p .opencode/agents
 cat > AGENTS.md <<'EOT'
 # AGENTS.md
 
+> Internal workflow provider switch reminder: see `README.md` → `## Internal workflow provider switch` for the manual `pnpm workflow:provider -- openai|copilot|current` commands.
+
 ## Mission
 Build LabFlowDeck into a mobile-first operational control plane for AI-assisted software delivery, aligned to `SPEC.md`, while keeping the shipped runtime honest about what is and is not live.
 
@@ -23,6 +25,14 @@ Read these in order when planning or implementing work:
 - Keep README and user-facing copy honest about shell-only or simulated behavior.
 - Prefer single-module, bounded phases over broad multi-surface expansion.
 - Respect the backlog constraints, especially bounded file count and clear validation.
+
+## README update gate
+At the end of every phase, make an explicit README decision:
+
+- `README_REQUIRED` if the phase changes shipped routes, visible shell behavior, auth/session behavior, persistence status, host/deploy/workflow capabilities, setup or operator guidance, or any claim about what is implemented versus placeholder-only.
+- `README_NOT_NEEDED` only if the phase is internal-only and does not change runtime truth, user-visible behavior, setup guidance, or implementation claims.
+
+If `README_REQUIRED`, update `README.md` in the same phase unless the user explicitly says not to. If `README_NOT_NEEDED`, record a one-line reason in the phase completion summary or validation notes.
 
 ## MCP and tool policy
 When available, prefer tools in this order:
@@ -198,6 +208,20 @@ When tools are available:
 - Reuse existing patterns and data shapes before adding new abstractions.
 - Avoid creating architecture that implies the full control plane already exists.
 
+## README gate
+Before finishing the phase, explicitly decide whether the phase requires a README update.
+
+Use `README_REQUIRED` when the change affects:
+- shipped routes or implemented surfaces,
+- auth or session behavior,
+- persistence, host, deploy, activity, or workflow capabilities,
+- setup, operator guidance, or environment expectations,
+- claims about what is live, simulated, placeholder-only, or out of scope.
+
+Use `README_NOT_NEEDED` only when the phase is internal-only and does not change repo truth for users or operators.
+
+If `README_REQUIRED`, update `README.md` in the same phase. If not updated, report the blocker explicitly.
+
 ## Validation behavior
 - Run the declared validation command from the phase plan.
 - If the touched surface is UI-heavy and tool access allows it, also perform a focused Playwright verification.
@@ -209,6 +233,8 @@ Return:
 - `what was implemented`
 - `validation attempted`
 - `tool evidence used`
+- `README_CHECK` with either `README_REQUIRED` or `README_NOT_NEEDED`
+- `README_REASON`
 - `what remains out of scope`
 - `blockers or risks`
 EOT
@@ -241,6 +267,8 @@ Confirm all of the following:
 - The declared validation command was appropriate and actually attempted.
 - Any extra verification is relevant and evidence-based.
 - User-facing copy does not overclaim shipped functionality.
+- README was updated when the phase changed user-visible or operator-visible repo truth.
+- If README was not updated, the builder gave a valid `README_NOT_NEEDED` reason.
 - Mobile-first quality and shell boundaries remain intact where applicable.
 
 ## LabFlowDeck-specific audit points
@@ -266,7 +294,8 @@ Return `FAIL` if:
 - acceptance criteria are not met,
 - validation evidence is missing for core claims,
 - the phase materially expanded scope,
-- or the change makes the repo appear more implemented than it actually is.
+- the change makes the repo appear more implemented than it actually is,
+- or the change should have updated README but did not.
 EOT
 
 cat > .opencode/agents/shipper.md <<'EOT'

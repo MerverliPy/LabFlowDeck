@@ -1,3 +1,8 @@
+---
+description: Implement only the active phase
+agent: builder
+---
+
 # /run-phase
 
 Execute the active phase in `.opencode/plans/current-phase.md`.

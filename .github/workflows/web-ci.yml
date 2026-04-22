@@ -8,13 +8,18 @@ on:
     branches:
       - main
 
+concurrency:
+  group: web-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   web:
-    name: Test, typecheck, and build web
+    name: Lint, test, typecheck, and build web
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Check out repository
@@ -35,8 +40,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Lint web app
+        run: pnpm lint:web
+
       - name: Run web tests
-        run: pnpm --dir apps/web test
+        run: pnpm test:web
 
       - name: Typecheck web app
         run: pnpm typecheck:web

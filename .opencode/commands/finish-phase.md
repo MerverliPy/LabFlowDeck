@@ -1,3 +1,8 @@
+---
+description: Finalize the active phase after implementation and validation
+agent: orchestrator
+---
+
 # /finish-phase
 
 Finalize the active phase after implementation and validation.

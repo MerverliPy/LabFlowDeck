@@ -8,6 +8,8 @@
     "lint:web": "pnpm --dir apps/web lint",
     "typecheck:web": "pnpm --dir apps/web exec next typegen && pnpm --dir apps/web exec tsc --noEmit",
     "test:web": "pnpm --dir apps/web test",
+    "workflow:check": "bash scripts/dev/workflow-check.sh",
+    "workflow:autoflow:inspect": "bash scripts/dev/autoflow.sh inspect-json",
     "workflow:provider": "node scripts/workflow-provider.mjs",
     "workflow:audit:deterministic": "bash scripts/audit-workflow-state.sh",
     "workflow:audit:agent": "promptfoo eval -c promptfooconfig.workflow.yaml --no-cache",

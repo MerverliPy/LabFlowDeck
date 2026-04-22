@@ -1,3 +1,8 @@
+---
+description: Resume the active phase without changing candidate scope
+agent: builder
+---
+
 # /resume-phase
 
 Resume work on the current phase in `.opencode/plans/current-phase.md`.
