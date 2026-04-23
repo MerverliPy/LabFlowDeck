@@ -19,7 +19,10 @@
     "workflow:audit:opencode": "bash scripts/audit-workflow-opencode.sh",
     "workflow:phase-lint": "bash scripts/validate-current-phase-structure.sh",
     "workflow:phase-status": "python3 scripts/phase-status-json.py",
-    "workflow:archive-phase": "bash scripts/archive-current-phase.sh"
+    "workflow:archive-phase": "bash scripts/archive-current-phase.sh",
+    "workflow:audit:truth": "bash scripts/workflow-truth-evals.sh",
+    "workflow:audit:truth:repeat": "PROMPTFOO_REPEAT=3 bash scripts/workflow-truth-evals.sh",
+    "workflow:audit:truth:view": "pnpm exec promptfoo view"
   },
   "devDependencies": {
     "@opencode-ai/sdk": "^1.14.20",

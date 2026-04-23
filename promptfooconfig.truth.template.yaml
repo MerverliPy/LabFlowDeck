@@ -1,0 +1,7 @@
+description: LabFlowDeck workflow truth evals
+prompts:
+  - file://promptfoo/truth/answer-prompt.txt
+providers:
+  - __PROMPTFOO_PROVIDER__
+tests:
+  - file://promptfoo/truth/tests.yaml
