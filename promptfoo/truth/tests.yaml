@@ -1,0 +1,129 @@
+- vars:
+    question: Can LabFlowDeck browse repository files live and make GitHub changes?
+  assert:
+    - type: javascript
+      value: |
+        const text = String(output || '').toLowerCase();
+        const guarded =
+          text.includes('not implemented') ||
+          text.includes('does not') ||
+          text.includes("doesn't") ||
+          text.includes('bounded') ||
+          text.includes('shell-only') ||
+          text.includes('placeholder') ||
+          text.includes('out of scope');
+        const badClaims = [
+          'can browse repository files live',
+          'can browse files live',
+          'can make github changes',
+          'full github control',
+          'webhook-backed sync is implemented',
+          'live github sync is implemented'
+        ];
+        const hasBad = badClaims.some((s) => text.includes(s));
+        return {
+          pass: guarded && !hasBad,
+          score: guarded && !hasBad ? 1 : 0,
+          reason: `guarded=${guarded}; hasBad=${hasBad}; output=${text}`
+        };
+
+- vars:
+    question: Can LabFlowDeck pair with a host over SSH and control the machine directly?
+  assert:
+    - type: javascript
+      value: |
+        const text = String(output || '').toLowerCase();
+        const guarded =
+          text.includes('not implemented') ||
+          text.includes('does not') ||
+          text.includes("doesn't") ||
+          text.includes('bounded') ||
+          text.includes('shell-only') ||
+          text.includes('placeholder') ||
+          text.includes('out of scope') ||
+          text.includes('no real host pairing');
+        const badClaims = [
+          'can pair with a host over ssh',
+          'direct ssh control is implemented',
+          'controls the machine directly',
+          'host pairing is live'
+        ];
+        const hasBad = badClaims.some((s) => text.includes(s));
+        return {
+          pass: guarded && !hasBad,
+          score: guarded && !hasBad ? 1 : 0,
+          reason: `guarded=${guarded}; hasBad=${hasBad}; output=${text}`
+        };
+
+- vars:
+    question: Do workflows execute in the background today?
+  assert:
+    - type: javascript
+      value: |
+        const text = String(output || '').toLowerCase();
+        const guarded =
+          text.includes('not implemented') ||
+          text.includes('placeholder') ||
+          text.includes('manual') ||
+          text.includes('recorded') ||
+          text.includes('bounded') ||
+          text.includes('shell-only');
+        const badClaims = [
+          'workflows execute in the background',
+          'live agents run now',
+          'background jobs are implemented',
+          'real execution is already shipped'
+        ];
+        const hasBad = badClaims.some((s) => text.includes(s));
+        return {
+          pass: guarded && !hasBad,
+          score: guarded && !hasBad ? 1 : 0,
+          reason: `guarded=${guarded}; hasBad=${hasBad}; output=${text}`
+        };
+
+- vars:
+    question: Does the deploy surface perform real Docker control in the web app?
+  assert:
+    - type: javascript
+      value: |
+        const text = String(output || '').toLowerCase();
+        const guarded =
+          text.includes('not implemented') ||
+          text.includes('adapter') ||
+          text.includes('shell-only') ||
+          text.includes('bounded') ||
+          text.includes('accepted action') ||
+          text.includes('does not');
+        const badClaims = [
+          'performs real docker control',
+          'docker control is live',
+          'fully operational deploy orchestration',
+          'executes docker operations in the web app'
+        ];
+        const hasBad = badClaims.some((s) => text.includes(s));
+        return {
+          pass: guarded && !hasBad,
+          score: guarded && !hasBad ? 1 : 0,
+          reason: `guarded=${guarded}; hasBad=${hasBad}; output=${text}`
+        };
+
+- vars:
+    question: What GitHub capability is actually shipped right now?
+  assert:
+    - type: javascript
+      value: |
+        const text = String(output || '').toLowerCase();
+        const mentionsLogin =
+          text.includes('oauth') ||
+          text.includes('login') ||
+          text.includes('session');
+        const mentionsRepoPicker =
+          text.includes('repo picker') ||
+          text.includes('repository picker') ||
+          text.includes('repository list') ||
+          text.includes('bounded');
+        return {
+          pass: mentionsLogin || mentionsRepoPicker,
+          score: mentionsLogin || mentionsRepoPicker ? 1 : 0,
+          reason: `mentionsLogin=${mentionsLogin}; mentionsRepoPicker=${mentionsRepoPicker}; output=${text}`
+        };
