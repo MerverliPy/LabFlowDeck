@@ -10,9 +10,10 @@ on:
       - unlabeled
       - ready_for_review
       - edited
+  workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
   pull-requests: read
 
