@@ -25,8 +25,8 @@
     "workflow:audit:truth:view": "pnpm exec promptfoo view"
   },
   "devDependencies": {
-    "@opencode-ai/sdk": "^1.14.20",
+    "@opencode-ai/sdk": "^1.14.28",
     "@playwright/test": "^1.59.1",
-    "promptfoo": "^0.121.5"
+    "promptfoo": "^0.121.8"
   }
 }
