@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: Update sticky PR summary
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = '<!-- labflowdeck:pr-summary -->';
